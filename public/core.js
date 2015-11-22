@@ -3,7 +3,7 @@ var engine;
 var scene;
 var camera;
 var time;
-var socket;
+var socket = io();
 
 // window events
 
@@ -12,8 +12,6 @@ window.onload = function() {
   // scene
   initScene();
 
-  // connect to socket
-  socket = io();
 }
 
 window.addEventListener("resize", function() {
@@ -137,6 +135,15 @@ function mouseClick() {
   }
   */
 }
+
+
+// SOCKETS
+
+socket.on('geometry_data', function(msg) {
+
+  console.log('received geometry blocks, amount: '+msg.blocks.length);
+
+});
 
 
 

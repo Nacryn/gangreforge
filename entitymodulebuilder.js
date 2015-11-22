@@ -5,10 +5,13 @@
 // an entity module is associated to one, and only one entity in the environment
 // its behavior has to be implemented exclusively in the respondToMessage function
 
-function EntityModule(entity_id) {
+function EntityModule(entity_module_api) {
 
-	// which entity this module is attached to
-	this.entity_id = entity_id;
+	// which entity this module is attached to (defined when added to environment collection)
+	this.entity_id = "";
+
+	// a reference to the module API
+	this.API = entity_module_api;
 
 	// this functions has to be overriden to implement custom behavior
 	// message is a string and data is an object
@@ -24,7 +27,7 @@ function EntityModule(entity_id) {
 // ****
 
 // this static object adds new modules to the environment
-function EntityModuleBuilder() {
+function EntityModuleBuilder(entity_module_api) {
 
 	// a dictionary of all the module build functions
 	this.module_build_functions = {};
@@ -32,6 +35,8 @@ function EntityModuleBuilder() {
 	// module descriptions
 	this.module_descriptions = {};
 
+	// a reference to the module API
+	this.module_api = entity_module_api;
 }
 
 // todo: store which module registered for which channel
@@ -47,7 +52,7 @@ EntityModuleBuilder.prototype.createModule = function(module_name) {
 	}
 
 	// module creation
-	var new_module = new EntityModule();
+	var new_module = new EntityModule(this.module_api);
 	this.module_build_functions[module_name](new_module);
 
 	return new_module;
@@ -75,6 +80,6 @@ EntityModuleBuilder.prototype.registerModule = function(module_name, description
 
 
 // export module
-module.exports = function() {
-	return new EntityModuleBuilder();
+module.exports = function(entity_module_api) {
+	return new EntityModuleBuilder(entity_module_api);
 }

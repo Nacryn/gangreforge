@@ -20,6 +20,7 @@ app.use(bodyParser.urlencoded({ extended: true })); // support encoded bodies
 var entity_module_api = require('./entitymoduleapi');
 var entity_module_builder = require('./entitymodulebuilder')(entity_module_api);
 var environment = require('./environment')(entity_module_builder);
+entity_module_api.environment = environment;
 
 // registering modules!
 require('./modules_list')(entity_module_builder);
@@ -43,8 +44,17 @@ io.on('connection', function(socket) {
 
 	console.log('user '+socket.id+' connected');
 
+	// create an entity in the environment
+	var id = "client"+socket.id;
+	environment.createNewEntity(id);
+	environment.attachModuleToEntity(id, "appearance");
+	environment.attachModuleToEntity(id, "client").socket = socket;
+
 	socket.on('disconnect', function() {
+
 		console.log('user '+socket.id+' disconnected');
+
+		// TODO: delete client entity
 	});
 
 });

@@ -13,15 +13,19 @@ app.use(bodyParser.urlencoded({ extended: true })); // support encoded bodies
 
 // TODO: implement DB saving/loading
 //var db_connection = require('./database');
-//db_connection.connect(
+//db_connection.connect(...);
 
 
+// actual 'game' logic
+var entity_module_api = require('./entitymoduleapi');
+var entity_module_builder = require('./entitymodulebuilder')(entity_module_api);
+var environment = require('./environment')(entity_module_builder);
 
-
+// registering modules!
+require('./modules_list')(entity_module_builder);
 
 
 // ROUTES
-
 
 // try static files in the public folder when accessing the root URL
 app.use(express.static(__dirname + '/public'));
@@ -54,4 +58,7 @@ var server = http.listen(8080, function () {
   var port = server.address().port;
 
   console.log('listening on %s:%s', host, port);
+
+  environment.init();
+  environment.update();
 });

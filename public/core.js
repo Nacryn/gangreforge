@@ -80,6 +80,23 @@ function renderLoop() {
 // tracking app time & update local stuff
 function updateLoop() {
   time += engine.getDeltaTime()*0.001;
+
+  // check what's under the cursor
+  // temp: should not be handled that way
+  var pickResult = scene.pick(scene.pointerX, scene.pointerY, function(mesh) {
+    if(mesh.isPickable) { return true; }
+  });
+  if(pickResult.hit) {
+    /*
+    if(pickResult.pickedMesh.entity_id) {
+      this.dispatchMessageToEntity(
+        pickResult.pickedMesh.entity_id, "hover_entity",
+        { click_position: pickResult.pickedPoint }
+      );
+    }
+    */
+  }
+
 }
 
 // used for ortho camera mode

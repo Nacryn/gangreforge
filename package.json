@@ -1,0 +1,12 @@
+{
+  "name": "gangreforge",
+  "version": "0.0.1",
+  "description": "where no human eyes should lie",
+  "main": "server.js",
+  "author": "gangreforge team",
+  "dependencies": {
+    "body-parser": "^1.14.1",
+    "express": "^4.13.3",
+    "socket.io": "^1.3.7"
+  }
+}

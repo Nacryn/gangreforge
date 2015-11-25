@@ -56,7 +56,7 @@ entity_module_builder.registerModule(
 
 			}
 
-		}
+		};
 
 		// this is the input code written by the client
 		// it is then parsed into drawing instructions
@@ -80,5 +80,5 @@ entity_module_builder.registerModule(
 	[]		// registered channels
 );
 
-}
+};
 

@@ -12,7 +12,7 @@ window.onload = function() {
   // scene
   initScene();
 
-}
+};
 
 window.addEventListener("resize", function() {
     if(engine) {

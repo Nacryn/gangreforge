@@ -75,7 +75,7 @@ Environment.prototype.init = function() {
 		this.entities[i] = new Entity(i);
 	}
 	*/
-}
+};
 
 Environment.prototype.update = function() {
 
@@ -102,8 +102,8 @@ Environment.prototype.update = function() {
 
 
 	// reschedule update
-	setTimeout(function() { instance.update() }, UPDATE_DELTA_TIME * 1000);
-}
+	setTimeout(function() { instance.update(); }, UPDATE_DELTA_TIME * 1000);
+};
 
 
 // collections manipulation
@@ -111,7 +111,7 @@ Environment.prototype.createNewEntity = function(entity_id) {
 	var new_entity = new Entity(entity_id);
 	this.entities[entity_id] = new Entity(entity_id);
 	return new_entity;
-}
+};
 Environment.prototype.attachModuleToEntity = function(entity_id, module_name) {
 	var module = this.module_builder.createModule(module_name);
 	if(module) {
@@ -119,7 +119,7 @@ Environment.prototype.attachModuleToEntity = function(entity_id, module_name) {
 		this.entity_modules.push(module);
 	}
 	return module;
-}
+};
 
 
 // this sends a message to all entity modules
@@ -128,7 +128,7 @@ Environment.prototype.dispatchMessage = function(message, data) {
 	for(var i=0; i<this.entity_modules.length; i++) {
 		this.entity_modules[i].respondToMessage(message, data);
 	}
-}
+};
 
 // dispatch a message only to a certain entity
 Environment.prototype.dispatchMessageToEntity = function(entity_id, message, data) {
@@ -137,7 +137,7 @@ Environment.prototype.dispatchMessageToEntity = function(entity_id, message, dat
 			this.entity_modules[i].respondToMessage(message, data);
 		}
 	}
-}
+};
 
 // returns an array of modules attached ton this entity
 Environment.prototype.getModulesList = function(entity_id) {
@@ -148,7 +148,7 @@ Environment.prototype.getModulesList = function(entity_id) {
 		}
 	}
 	return result;
-}
+};
 
 // returns entities close to the specified one, i.e. in the same quadtree cell
 // TODO: actually implement quadtree
@@ -157,7 +157,7 @@ Environment.prototype.getNearbyEntities = function(entity_id) {
 	var id;
 	for(id in this.entities) { entities.push(this.entities[id]); }
 	return entities;
-}
+};
 
 
 
@@ -172,8 +172,8 @@ function GeometryBuffer() {
 
 	// blocks are created along the way when redrawing the geometry
 	this.blocks = [new GeometryBlock()];
-	this.current_block;
-	this.block_cursor;
+	this.current_block = null;
+	this.block_cursor = -1;
 	this.changed = true;
 }
 
@@ -181,7 +181,7 @@ function GeometryBuffer() {
 GeometryBuffer.prototype.start = function() {
 	this.current_block = this.blocks[0];
 	this.block_cursor = 0;
-}
+};
 
 // we're done filling the buffers
 GeometryBuffer.prototype.end = function() {
@@ -197,14 +197,14 @@ GeometryBuffer.prototype.end = function() {
 	this.blocks.splice(this.block_cursor + 1, this.blocks.length);
 
 	this.changed = false;
-}
+};
 
 // returns the current amount of vertices injected in the buffer
 //GeometryBuffer.prototype.getVertexCount = function() { return this.positions_cursor / 3; }
 //GeometryBuffer.prototype.getTriangleCount = function() { return this.indices_cursor / 3; }
 GeometryBuffer.prototype.getBaseIndex = function() {
 	return this.current_block.positions_cursor / 3;
-}
+};
 
 // these functions make sure that there is enough space in the current block, otherwise they add a new one
 GeometryBuffer.prototype.prepareNewVertex = function() {
@@ -217,7 +217,7 @@ GeometryBuffer.prototype.prepareNewVertex = function() {
 			this.current_block = this.blocks[this.block_cursor];
 		}
 	}
-}
+};
 GeometryBuffer.prototype.prepareNewTriangle = function() {
 	if(this.current_block.indices_cursor >= GEOMETRYBLOCK_TRIANGLE_COUNT * 3) {
 		this.block_cursor++;
@@ -228,7 +228,7 @@ GeometryBuffer.prototype.prepareNewTriangle = function() {
 			this.current_block = this.blocks[this.block_cursor];
 		}
 	}
-}
+};
 
 // short methods for adding a position, normal, color, index
 GeometryBuffer.prototype.p = function(x, y, z) {
@@ -236,24 +236,24 @@ GeometryBuffer.prototype.p = function(x, y, z) {
 	this.current_block.positions[this.current_block.positions_cursor++] = x;
 	this.current_block.positions[this.current_block.positions_cursor++] = y;
 	this.current_block.positions[this.current_block.positions_cursor++] = z;
-}
+};
 GeometryBuffer.prototype.n = function(x, y, z) {
 	this.current_block.normals[this.current_block.normals_cursor++] = x;
 	this.current_block.normals[this.current_block.normals_cursor++] = y;
 	this.current_block.normals[this.current_block.normals_cursor++] = z;
-}
+};
 GeometryBuffer.prototype.c = function(r, g, b, a) {
 	this.current_block.colors[this.current_block.colors_cursor++] = r;
 	this.current_block.colors[this.current_block.colors_cursor++] = g;
 	this.current_block.colors[this.current_block.colors_cursor++] = b;
 	this.current_block.colors[this.current_block.colors_cursor++] = a;
-}
+};
 GeometryBuffer.prototype.i = function(f0, f1, f2) {
 	this.prepareNewTriangle();
 	this.current_block.indices[this.current_block.indices_cursor++] = f0;
 	this.current_block.indices[this.current_block.indices_cursor++] = f1;
 	this.current_block.indices[this.current_block.indices_cursor++] = f2;
-}
+};
 
 
 // geometry drawing functions
@@ -290,7 +290,7 @@ GeometryBuffer.prototype.drawBox = function(x, y, z, r, g, b, sx, sy, sz) {
 	this.i(base_index+12, base_index+13, base_index+14); this.i(base_index+14, base_index+15, base_index+12);
 	this.i(base_index+16, base_index+17, base_index+18); this.i(base_index+18, base_index+19, base_index+16);
 	this.i(base_index+20, base_index+21, base_index+22); this.i(base_index+22, base_index+23, base_index+20);
-}
+};
 
 // a disc is originally facing Y+
 // rd is radius
@@ -311,7 +311,7 @@ GeometryBuffer.prototype.drawDisc = function(x, y, z, r, g, b, rd) {
 		else { this.i(base_index, base_index + i + 1, base_index + 1); }
 	}
 
-}
+};
 
 
 
@@ -335,7 +335,7 @@ function GeometryBlock() {
 // serialize method
 GeometryBlock.prototype.toJSON = function() {
 	// TODO
-}
+};
 
 // placeholder (unused)
 // GeometryBlock.prototype.dispose() { }

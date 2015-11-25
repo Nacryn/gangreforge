@@ -7,22 +7,22 @@ function EntityModuleAPI() {
 // returns the Entity object with the specified id
 EntityModuleAPI.prototype.getEntityById = function(id) {
 	return this.environment.entities[id];
-}
+};
 
 // focus camera!
 EntityModuleAPI.prototype.focusCamera = function(position) {
 	// TODO
-}
+};
 
 // dispatch a message to all modules
 EntityModuleAPI.prototype.dispatchMessage = function(message, data) {
 	this.environment.dispatchMessage(message, data);
-}
+};
 
 // dispatch a message to a specific entity
 EntityModuleAPI.prototype.dispatchMessageToEntity = function(entity_id, message, data) {
 	this.environment.dispatchMessageToEntity(entity_id, message, data);
-}
+};
 
 // returns the geometry buffer for this entity
 // there can only be one buffer by entity
@@ -37,12 +37,12 @@ EntityModuleAPI.prototype.requestGeometryBuffer = function(entity_id) {
 	var buffer = this.getEntityById(entity_id).geometry_buffer;
 	buffer.changed = true;
 	return buffer;
-}
+};
 
 // returns nearby entities
 EntityModuleAPI.prototype.getNearbyEntities = function(entity_id) {
 	return this.environment.getNearbyEntities(entity_id);
-}
+};
 
 
 

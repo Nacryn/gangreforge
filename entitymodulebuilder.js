@@ -56,7 +56,7 @@ EntityModuleBuilder.prototype.createModule = function(module_name) {
 	this.module_build_functions[module_name](new_module);
 
 	return new_module;
-}
+};
 
 // this is used to register custom modules in the builder
 // module_name is a string
@@ -76,10 +76,10 @@ EntityModuleBuilder.prototype.registerModule = function(module_name, description
 	// registering build function & description
 	this.module_build_functions[module_name] = build_function;
 	this.module_descriptions[module_name] = description;
-}
+};
 
 
 // export module
 module.exports = function(entity_module_api) {
 	return new EntityModuleBuilder(entity_module_api);
-}
+};

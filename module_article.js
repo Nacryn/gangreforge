@@ -8,11 +8,11 @@ entity_module_builder.registerModule(
 	function(module) {
 
 		// overriding respond function
-		module.respondToMessage = function(message, data) {}
+		module.respondToMessage = function(message, data) {};
 
 	},
 	
 	[]		// registered channels
 );
 
-}
+};

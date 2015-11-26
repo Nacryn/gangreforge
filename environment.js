@@ -51,12 +51,12 @@ Environment.prototype.init = function() {
 
 	// add entities (temp)
 
-	this.createNewEntity("bob").position = {x: 4, y:0, z:12};
-	this.createNewEntity("bob2").position = {x: 2, y:0, z:1};
-	this.createNewEntity("test").position = {x: -7, y:0, z:5};
-	this.createNewEntity("aaaaaa").position = {x: -11, y:0, z:-15};
-	this.createNewEntity("aaaaaa2").position = {x: -15, y:0, z:7};
-	this.createNewEntity("aaaaaa3").position = {x: 21, y:0, z:-2};
+	this.createNewEntity("bob").position = {x: 4, y:0, z:0};
+	this.createNewEntity("bob2").position = {x: 4, y:0, z:4};
+	this.createNewEntity("test").position = {x: -4, y:0, z:4};
+	this.createNewEntity("aaaaaa").position = {x: -4, y:0, z:-4};
+	this.createNewEntity("aaaaaa2").position = {x: 4, y:0, z:-4};
+	this.createNewEntity("aaaaaa3").position = {x: 0, y:0, z:-4};
 
 
 	// add modules to these entities
@@ -109,7 +109,7 @@ Environment.prototype.update = function() {
 // collections manipulation
 Environment.prototype.createNewEntity = function(entity_id) {
 	var new_entity = new Entity(entity_id);
-	this.entities[entity_id] = new Entity(entity_id);
+	this.entities[entity_id] = new_entity;
 	return new_entity;
 };
 Environment.prototype.attachModuleToEntity = function(entity_id, module_name) {
@@ -197,6 +197,11 @@ GeometryBuffer.prototype.end = function() {
 	this.blocks.splice(this.block_cursor + 1, this.blocks.length);
 
 	this.changed = false;
+};
+
+// used for sending data to client
+GeometryBuffer.prototype.appendBlocksData = function(array) {
+	for(var i=0; i<this.blocks.length; i++) { array.push(this.blocks[i].exposeData()); }
 };
 
 // returns the current amount of vertices injected in the buffer
@@ -314,6 +319,8 @@ GeometryBuffer.prototype.drawDisc = function(x, y, z, r, g, b, rd) {
 };
 
 
+// used for blocks id
+var shortid = require('shortid');
 
 var GEOMETRYBLOCK_VERTEX_COUNT = 300;
 var GEOMETRYBLOCK_TRIANGLE_COUNT = 100;
@@ -321,6 +328,8 @@ var GEOMETRYBLOCK_TRIANGLE_COUNT = 100;
 // geometry blocks hold geometry data (incl. indices)
 // they are serializable so they can be sent to the client
 function GeometryBlock() {
+	this.id = shortid.generate();
+
 	this.positions = new Float32Array(GEOMETRYBLOCK_VERTEX_COUNT * 3);
 	this.normals = new Float32Array(GEOMETRYBLOCK_VERTEX_COUNT * 3);
 	this.colors = new Float32Array(GEOMETRYBLOCK_VERTEX_COUNT * 4);
@@ -332,9 +341,13 @@ function GeometryBlock() {
 	this.indices_cursor = 0;
 }
 
-// serialize method
-GeometryBlock.prototype.toJSON = function() {
-	// TODO
+// serialize method (not used)
+//GeometryBlock.prototype.toJSON = function() {
+//};
+
+// used for sending this data to the client
+GeometryBlock.prototype.exposeData = function() {
+	return { id: this.id, positions: this.positions, normals: this.normals, colors: this.colors, indices: this.indices };
 };
 
 // placeholder (unused)

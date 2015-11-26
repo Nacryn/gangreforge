@@ -49,6 +49,8 @@ entity_module_builder.registerModule(
 					1, 2, 1
 				);
 
+				//console.dir(entity.position);
+
 				this.dirty = false;
 
 				break;

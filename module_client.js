@@ -25,7 +25,7 @@ entity_module_builder.registerModule(
 
 					// todo: do not send geometry blocks if they haven't changed
 
-					blocks = blocks.concat(nearby_entities[i].geometry_buffer.blocks);
+					nearby_entities[i].geometry_buffer.appendBlocksData(blocks);
 				}
 
 				//send these blocks to the client

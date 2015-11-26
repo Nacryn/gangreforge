@@ -8,4 +8,4 @@ module.exports = function(entity_module_builder) {
 	require('./module_article')(entity_module_builder);
 	require('./module_client')(entity_module_builder);
 
-}
+};

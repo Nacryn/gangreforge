@@ -5,7 +5,7 @@ module.exports = function(entity_module_builder) {
 entity_module_builder.registerModule(
 
 	"client",
-	"this module handles client interaction in the scene",
+	"this module handles client interaction in the scene and sends environment update through the client socket",
 
 	function(module) {
 
@@ -25,7 +25,7 @@ entity_module_builder.registerModule(
 
 					// todo: do not send geometry blocks if they haven't changed
 
-					blocks = blocks.concat(nearby_entities[i].geometry_buffer.blocks);
+					nearby_entities[i].geometry_buffer.appendBlocksData(blocks);
 				}
 
 				//send these blocks to the client
@@ -33,14 +33,14 @@ entity_module_builder.registerModule(
 					blocks: blocks
 				});
 
-				console.log('i just sent '+blocks.length+' blocks (nearby = '+nearby_entities.length+')');
+				//console.log('i just sent '+blocks.length+' blocks (nearby = '+nearby_entities.length+')');
 
 				break;
 
 
 			}
 
-		}
+		};
 
 		module.socket = null;		// this must be set manually!
 
@@ -49,4 +49,4 @@ entity_module_builder.registerModule(
 	[]		// registered channels
 );
 
-}
+};

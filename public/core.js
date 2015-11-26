@@ -4,6 +4,7 @@ var scene;
 var camera;
 var time;
 var socket = io();
+var geometry_handler;
 
 // window events
 
@@ -12,7 +13,7 @@ window.onload = function() {
   // scene
   initScene();
 
-}
+};
 
 window.addEventListener("resize", function() {
     if(engine) {
@@ -60,8 +61,11 @@ function initScene() {
   ground.bakeCurrentTransformIntoVertices();
   ground.isVisible = false;
 
+  // geometry handler
+  geometry_handler = new GeometryHandler();
+
   // temp
-  BABYLON.Mesh.CreateBox("box", 3, scene);
+  //BABYLON.Mesh.CreateBox("box", 3, scene);
 
   // start loop
   BABYLON.Tools.QueueNewFrame(renderLoop);
@@ -141,8 +145,11 @@ function mouseClick() {
 
 socket.on('geometry_data', function(msg) {
 
-  console.log('received geometry blocks, amount: '+msg.blocks.length);
+  //console.log('received geometry blocks, amount: '+msg.blocks.length);
+  //console.dir(msg.blocks);
 
+  // we need to integrate the blocks into our geometry pool
+  geometry_handler.injectGeometryBlocks(msg.blocks);
 });
 
 

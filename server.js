@@ -60,7 +60,6 @@ io.on('connection', function(socket) {
 });
 
 
-
 // SERVER LAUNCH
 
 var server = http.listen(8080, function () {

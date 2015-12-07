@@ -2,6 +2,8 @@ function EntityModuleAPI() {
 
 	// environment! used for various functions
 	this.environment = null;	// must be set manually
+
+	//this.iostream = null;		// socket.io-stream module
 }
 
 // returns the Entity object with the specified id
@@ -44,6 +46,18 @@ EntityModuleAPI.prototype.getNearbyEntities = function(entity_id) {
 	return this.environment.getNearbyEntities(entity_id);
 };
 
+// sends data to socket by streaming
+/*
+EntityModuleAPI.prototype.streamData = function(socket, data) {
+	var stream = this.iostream.createStream();
+	this.iostream(socket).emit('geometry_data', stream, { blocks: null });
+}
+*/
+
+// returns the time since server launch, in seconds
+EntityModuleAPI.prototype.getTime = function() {
+	return Date.now() * 0.001;
+}
 
 
 // export module

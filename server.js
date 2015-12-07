@@ -53,10 +53,8 @@ io.on('connection', function(socket) {
 	environment.attachModuleToEntity(id, "client").socket = socket;
 
 	socket.on('disconnect', function() {
-
 		console.log('user '+socket.id+' disconnected');
-
-		// TODO: delete client entity
+		environment.deleteEntity("client"+socket.id);
 	});
 
 });

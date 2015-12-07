@@ -57,7 +57,7 @@ EntityModuleAPI.prototype.streamData = function(socket, data) {
 // returns the time since server launch, in seconds
 EntityModuleAPI.prototype.getTime = function() {
 	return Date.now() * 0.001;
-}
+};
 
 
 // export module

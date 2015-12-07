@@ -56,7 +56,7 @@ function streamGeometry() {
 	// let's find a block to transmit
 	var block, index, i;
 	for(i=0; i<geometry_blocks_collection.length; i++) {
-		if(geometry_blocks_collection[i] != null) {
+		if(geometry_blocks_collection[i]) {
 			block = geometry_blocks_collection[i];
 			index = i;
 			break;

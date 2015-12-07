@@ -97,6 +97,7 @@ GeometryHandler.prototype.injectGeometryBlockAt = function(geometry_block, slot)
 	var base_vertex = slot * GEOMETRYBLOCK_VERTEX_COUNT;
 	var base_index = slot * GEOMETRYBLOCK_TRIANGLE_COUNT;
 	var i;
+	
 	for(i=0; i<GEOMETRYBLOCK_VERTEX_COUNT; i++) {
 
 		this.static_positions[base_vertex * 3 + i * 3] = geometry_block.positions[i * 3];

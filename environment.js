@@ -125,6 +125,18 @@ Environment.prototype.attachModuleToEntity = function(entity_id, module_name) {
 	}
 	return module;
 };
+Environment.prototype.deleteEntity = function(entity_id) {
+	// remove modules
+	for(var i=0; i<this.entity_modules.length; i++) {
+		if(this.entity_modules[i].entity_id == entity_id) {
+			this.entity_modules.splice(i, 1);
+			i--;
+		}
+	}
+	//remove entity
+	this.entities[entity_id] = null;
+	delete this.entities[entity_id];
+};
 
 
 // this sends a message to all entity modules

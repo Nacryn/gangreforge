@@ -3,7 +3,6 @@ var engine;
 var scene;
 var camera;
 var time;
-var socket = io();
 var geometry_handler;
 
 // window events
@@ -51,10 +50,6 @@ function initScene() {
   light.diffuseColor = new BABYLON.Color3(1.0, 1.0, 1.0);
   light.groundColor = new BABYLON.Color3(0.2, 0.2, 0.2);
 
-  // environment setup
-  //environment = new Environment();
-  //environment.init();
-
   // ground mockup for ground click detection
   var ground = BABYLON.Mesh.CreatePlane("ground_plane", 10000, scene);
   ground.rotation.x = Math.PI/2;
@@ -65,7 +60,7 @@ function initScene() {
   geometry_handler = new GeometryHandler();
 
   // temp
-  //BABYLON.Mesh.CreateBox("box", 3, scene);
+  BABYLON.Mesh.CreateBox("box", 0.2, scene);
 
   // start loop
   BABYLON.Tools.QueueNewFrame(renderLoop);
@@ -141,18 +136,17 @@ function mouseClick() {
 }
 
 
-// SOCKETS
+// INTERFACE WITH WORKER
 
-socket.on('geometry_data', function(msg) {
+var worker = new Worker("worker.js");
 
-  //console.log('received geometry blocks, amount: '+msg.blocks.length);
-  //console.dir(msg.blocks);
+worker.onmessage = function(msg) {
+  //console.dir(msg);
 
-  // we need to integrate the blocks into our geometry pool
-  geometry_handler.injectGeometryBlocks(msg.blocks);
-});
-
-
+  if(msg.data.type == "geometry_block") {
+    geometry_handler.injectGeometryBlocks([msg.data.block]);
+  }
+};
 
 
 // utils

@@ -5,6 +5,7 @@ var app = express();
 
 var http = require('http').Server(app);
 var io = require('socket.io')(http);
+//var iostream = require('socket.io-stream');
 var path = require('path');
 
 var bodyParser = require('body-parser');
@@ -21,6 +22,7 @@ var entity_module_api = require('./entitymoduleapi');
 var entity_module_builder = require('./entitymodulebuilder')(entity_module_api);
 var environment = require('./environment')(entity_module_builder);
 entity_module_api.environment = environment;
+//entity_module_api.iostream = iostream;
 
 // registering modules!
 require('./modules_list')(entity_module_builder);

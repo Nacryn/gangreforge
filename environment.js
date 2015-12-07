@@ -58,6 +58,11 @@ Environment.prototype.init = function() {
 	this.createNewEntity("aaaaaa2").position = {x: 4, y:0, z:-4};
 	this.createNewEntity("aaaaaa3").position = {x: 0, y:0, z:-4};
 
+	for(var i=0; i<100; i++) {
+		this.createNewEntity("entity"+i).position = {x: Math.random()*20-10 , y:0, z: Math.random()*20-10};
+		this.attachModuleToEntity("entity"+i, "appearance");
+	}
+
 
 	// add modules to these entities
 	this.attachModuleToEntity("bob", "appearance");
@@ -175,12 +180,22 @@ function GeometryBuffer() {
 	this.current_block = null;
 	this.block_cursor = -1;
 	this.changed = true;
+
+	// this is used to keep track of where we are in geometry building
+	// every three position or index, we're finished a vertex and need
+	// to make sure we can make another one
+	this.new_vertex_counter = 3;
+	this.new_triangle_counter = 3;
 }
 
 // reset cursors: we're ready for refilling the buffers
 GeometryBuffer.prototype.start = function() {
 	this.current_block = this.blocks[0];
 	this.block_cursor = 0;
+	this.current_block.positions_cursor = 0;
+	this.current_block.normals_cursor = 0;
+	this.current_block.colors_cursor = 0;
+	this.current_block.indices_cursor = 0;
 };
 
 // we're done filling the buffers
@@ -202,6 +217,7 @@ GeometryBuffer.prototype.end = function() {
 // used for sending data to client
 GeometryBuffer.prototype.appendBlocksData = function(array) {
 	for(var i=0; i<this.blocks.length; i++) { array.push(this.blocks[i].exposeData()); }
+	return array;
 };
 
 // returns the current amount of vertices injected in the buffer
@@ -214,33 +230,39 @@ GeometryBuffer.prototype.getBaseIndex = function() {
 // these functions make sure that there is enough space in the current block, otherwise they add a new one
 GeometryBuffer.prototype.prepareNewVertex = function() {
 	if(this.current_block.positions_cursor >= GEOMETRYBLOCK_VERTEX_COUNT * 3) {
-		this.block_cursor++;
-		if(this.block_cursor >= this.blocks.length) {
-			this.current_block = new GeometryBlock();
-			this.blocks.push(this.current_block);
-		} else {
-			this.current_block = this.blocks[this.block_cursor];
-		}
+		this.jumpToNextBlock();
 	}
 };
 GeometryBuffer.prototype.prepareNewTriangle = function() {
 	if(this.current_block.indices_cursor >= GEOMETRYBLOCK_TRIANGLE_COUNT * 3) {
+		this.jumpToNextBlock();
+	}
+};
+
+GeometryBuffer.prototype.jumpToNextBlock = function() {
 		this.block_cursor++;
 		if(this.block_cursor >= this.blocks.length) {
 			this.current_block = new GeometryBlock();
 			this.blocks.push(this.current_block);
 		} else {
 			this.current_block = this.blocks[this.block_cursor];
+			this.current_block.positions_cursor = 0;
+			this.current_block.normals_cursor = 0;
+			this.current_block.colors_cursor = 0;
+			this.current_block.indices_cursor = 0;
 		}
-	}
 };
 
 // short methods for adding a position, normal, color, index
 GeometryBuffer.prototype.p = function(x, y, z) {
-	this.prepareNewVertex();
 	this.current_block.positions[this.current_block.positions_cursor++] = x;
 	this.current_block.positions[this.current_block.positions_cursor++] = y;
 	this.current_block.positions[this.current_block.positions_cursor++] = z;
+	this.new_vertex_counter--;
+	if(this.new_vertex_counter === 0) {
+		this.prepareNewVertex();
+		this.new_vertex_counter = 3;
+	}
 };
 GeometryBuffer.prototype.n = function(x, y, z) {
 	this.current_block.normals[this.current_block.normals_cursor++] = x;
@@ -258,6 +280,11 @@ GeometryBuffer.prototype.i = function(f0, f1, f2) {
 	this.current_block.indices[this.current_block.indices_cursor++] = f0;
 	this.current_block.indices[this.current_block.indices_cursor++] = f1;
 	this.current_block.indices[this.current_block.indices_cursor++] = f2;
+	this.new_triangle_counter--;
+	if(this.new_triangle_counter === 0) {
+		this.prepareNewTriangle();
+		this.new_triangle_counter = 3;
+	}
 };
 
 

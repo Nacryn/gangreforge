@@ -18,20 +18,24 @@ entity_module_builder.registerModule(
 				case "send_geometry":
 
 				var nearby_entities = this.API.getNearbyEntities(this.entity_id);
-				var blocks = [];
+				var stream_data = { blocks: [] };
 				var i;
 
 				for(i=0; i<nearby_entities.length; i++) {
 
 					// todo: do not send geometry blocks if they haven't changed
 
-					nearby_entities[i].geometry_buffer.appendBlocksData(blocks);
+					nearby_entities[i].geometry_buffer.appendBlocksData(stream_data.blocks);
+
+					// this.socket.emit('geometry_data', {
+					// 	blocks: nearby_entities[i].geometry_buffer.appendBlocksData([])
+					// });
 				}
 
 				//send these blocks to the client
-				this.socket.emit('geometry_data', {
-					blocks: blocks
-				});
+				this.socket.emit('geometry_data', stream_data);
+				
+				//this.API.streamData(this.socket, stream_data);
 
 				//console.log('i just sent '+blocks.length+' blocks (nearby = '+nearby_entities.length+')');
 

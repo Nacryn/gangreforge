@@ -97,13 +97,12 @@ GeometryHandler.prototype.injectGeometryBlockAt = function(geometry_block, slot)
 	var base_vertex = slot * GEOMETRYBLOCK_VERTEX_COUNT;
 	var base_index = slot * GEOMETRYBLOCK_TRIANGLE_COUNT;
 	var i;
-
-	for(i=0; i<this.block_vertex_count; i++) {
+	for(i=0; i<GEOMETRYBLOCK_VERTEX_COUNT; i++) {
 
 		this.static_positions[base_vertex * 3 + i * 3] = geometry_block.positions[i * 3];
 		this.static_positions[base_vertex * 3 + i * 3 + 1] = geometry_block.positions[i * 3 + 1];
 		this.static_positions[base_vertex * 3 + i * 3 + 2] = geometry_block.positions[i * 3 + 2];
-
+		
 		this.static_normals[base_vertex * 3 + i * 3] = geometry_block.normals[i * 3];
 		this.static_normals[base_vertex * 3 + i * 3 + 1] = geometry_block.normals[i * 3 + 1];
 		this.static_normals[base_vertex * 3 + i * 3 + 2] = geometry_block.normals[i * 3 + 2];
@@ -112,9 +111,10 @@ GeometryHandler.prototype.injectGeometryBlockAt = function(geometry_block, slot)
 		this.static_colors[base_vertex * 4 + i * 4 + 1] = geometry_block.colors[i * 4 + 1];
 		this.static_colors[base_vertex * 4 + i * 4 + 2] = geometry_block.colors[i * 4 + 2];
 		this.static_colors[base_vertex * 4 + i * 4 + 3] = geometry_block.colors[i * 4 + 3];
+		
 	}
 
-	for(i=0; i<this.block_triangle_count; i++) {
+	for(i=0; i<GEOMETRYBLOCK_TRIANGLE_COUNT; i++) {
 		this.static_indices[base_index * 3 + i * 3] = base_vertex + geometry_block.indices[i * 3];
 		this.static_indices[base_index * 3 + i * 3 + 1] = base_vertex + geometry_block.indices[i * 3 + 1];
 		this.static_indices[base_index * 3 + i * 3 + 2] = base_vertex + geometry_block.indices[i * 3 + 2];

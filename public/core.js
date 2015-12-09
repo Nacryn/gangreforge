@@ -125,7 +125,11 @@ function mouseClick() {
         type: 'dispatch_message',
         name: 'click_entity',
         entity_id: pickResult.pickedMesh.entity_id,
-        data: { click_position: pickResult.pickedPoint }  // we send the clicked point in the entity locak space
+        data: { click_position: [
+          pickResult.pickedPoint.x,  // we send the clicked point in the entity local space
+          pickResult.pickedPoint.y,
+          pickResult.pickedPoint.z
+        ] }  
       });
     }
 
@@ -134,7 +138,11 @@ function mouseClick() {
       worker.postMessage({
         type: 'dispatch_message',
         name: 'click_world',
-        data: { click_position: pickResult.pickedPoint }  // we send the clicked point in the entity locak space
+        data: { click_position: [
+          pickResult.pickedPoint.x,
+          pickResult.pickedPoint.y,
+          pickResult.pickedPoint.z
+        ] }
       });      
     }
 

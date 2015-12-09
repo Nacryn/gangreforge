@@ -28,8 +28,7 @@ EntityModuleAPI.prototype.dispatchMessageToEntity = function(entity_id, message,
 
 // returns the geometry buffer for this entity
 // there can only be one buffer by entity
-// WARNING: when doing this, the buffer is marked as touched (state counter increased)
-EntityModuleAPI.prototype.requestGeometryBuffer = function(entity_id) {
+EntityModuleAPI.prototype.getGeometryBuffer = function(entity_id) {
 	/*
 	if(!this.geometry_buffers[entity_id]) {
 		this.geometry_buffers[entity_id] = new GeometryBuffer();
@@ -37,8 +36,13 @@ EntityModuleAPI.prototype.requestGeometryBuffer = function(entity_id) {
 	return this.geometry_buffers[entity_id];
 	*/
 	var buffer = this.getEntityById(entity_id).geometry_buffer;
-	buffer.changed = true;
+	//buffer.changed = true;
 	return buffer;
+};
+
+// a redrawn of the geometry by all associated modules will be done after this
+EntityModuleAPI.prototype.askGeometryRedraw = function(entity_id) {
+	this.getEntityById(entity_id).geometry_changed = true;
 };
 
 // returns nearby entities
@@ -56,13 +60,13 @@ EntityModuleAPI.prototype.streamData = function(socket, data) {
 
 // entity movement; new_pos is a [x,y,z] array; speed is in units/sec
 EntityModuleAPI.prototype.moveEntity = function(entity_id, new_position, speed) {
-	var entity = this.environment.getEntityById(entity_id);
+	var entity = this.getEntityById(entity_id);
 	entity.evalPosition();
 	entity.state_counter++;
 	entity.target_position = new_position;
 	entity.last_eval_time = this.getTime();
 	entity.speed = speed;
-}
+};
 
 
 

@@ -12,6 +12,7 @@
 // these blocks are sent to the client by the "client" modules
 // so the "appearance" modules only handle filling the buffer
 
+// note: all geometry is drawn in local space!
 
 
 module.exports = function(entity_module_builder) {
@@ -35,23 +36,23 @@ entity_module_builder.registerModule(
 				// refresh geometry based on instructions list (if it has changed)
 				case "refresh_geometry":
 
-				if(!this.dirty) { break; }
+				//if(!this.dirty) { break; }
 
-				var buffer = this.API.requestGeometryBuffer(this.entity_id);
+				var buffer = this.API.getGeometryBuffer(this.entity_id);
 				var entity = this.API.getEntityById(this.entity_id);
 
 				// TEMP!!
 				buffer.drawBox(
-					entity.position[0],
-					entity.position[1],
-					entity.position[2],
+					0,
+					0,
+					0,
 					0.6, 0.4, 0.4,
 					1, 2, 1
 				);
 
 				//console.dir(entity.position);
 
-				this.dirty = false;
+				//this.dirty = false;
 
 				break;
 
@@ -76,7 +77,7 @@ entity_module_builder.registerModule(
 		module.translation = {x:0, y:0, z:0};
 		module.draw_color = {r:0, g:0, b:0};		// alpha not supported
 
-		module.dirty = true;
+		//module.dirty = true;
 	},
 	
 	[]		// registered channels

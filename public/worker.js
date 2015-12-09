@@ -10,41 +10,60 @@ var socket = io();
 var geometry_blocks_collection = new Array(100);
 var geometry_blocks_ids = new Array(100);
 
-// the server just sent us new geometry
+// the server just sent us new geometry and entity states in an array
 // the worker will break down this data into small arrays, and pass them to the main thread
-socket.on('geometry_data', function(msg) {
+socket.on('rendering_data', function(msg) {
 
-	console.log("[WORKER] received "+msg.blocks.length+" block");
-	var index, block, i;
+	console.log("[WORKER] received data from "+msg.length+" entities");
+	var index, block, i, j, k;
+	var entity_states = [];
+	var entity_state;
 
-	// for each block, add/replace it in the collection
-	for(i=0; i<msg.blocks.length; i++) {
-		block = msg.blocks[i];
+	// for each entity, concatenate entity states add/replace its blocks in the collection
+	for(i=0; i<msg.length; i++) {
 
-		// 1. look for the id in the existing collection
-		index = geometry_blocks_ids.indexOf(block.id);
+		// add this entity state
+		if(msg[i].state) {
+			entity_state = {
+				entity_id: msg[i].entity_id,
+				state: msg[i].state
+			};
+			entity_states.push(msg[i].state);
+		}
 
-		// 2. id not found: look for the first empty slot
-		if(index == -1) {
-			var j;
-			for(j=0; j<geometry_blocks_ids.length; j++) {
-				if(!geometry_blocks_ids[j]) {
-					index = j;
-					geometry_blocks_ids[index] = block.id;
-					break;
+		// no geometry blocks for this entity: skip!
+		if(!msg[i].blocks) { continue; }
+
+		for(j=0; j<msg[i].blocks.length; j++) {
+
+			block = msg[i].blocks[j];
+
+			// 1. look for the id in the existing collection
+			index = geometry_blocks_ids.indexOf(block.id);
+
+			// 2. id not found: look for the first empty slot
+			if(index == -1) {
+				for(k=0; k<geometry_blocks_ids.length; k++) {
+					if(!geometry_blocks_ids[k]) {
+						index = k;
+						geometry_blocks_ids[index] = block.id;
+						break;
+					}
 				}
 			}
+
+			// 3. empty slot not found: skip
+			if(index == -1) {
+				continue;
+			}
+
+			//console.log("stored 1 block");
+
+			// store block in collection
+			block.entity_id = msg[i].entity_id;
+			geometry_blocks_collection[index] = block;
+
 		}
-
-		// 3. empty slot not found: skip
-		if(index == -1) {
-			continue;
-		}
-
-		//console.log("stored 1 block");
-
-		// store block in collection
-		geometry_blocks_collection[index] = block;
 
 	}
   

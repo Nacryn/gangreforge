@@ -28,7 +28,7 @@ EntityModuleAPI.prototype.dispatchMessageToEntity = function(entity_id, message,
 
 // returns the geometry buffer for this entity
 // there can only be one buffer by entity
-// WARNING: when doing this, the buffer is marked as changed
+// WARNING: when doing this, the buffer is marked as touched (state counter increased)
 EntityModuleAPI.prototype.requestGeometryBuffer = function(entity_id) {
 	/*
 	if(!this.geometry_buffers[entity_id]) {
@@ -53,6 +53,20 @@ EntityModuleAPI.prototype.streamData = function(socket, data) {
 	this.iostream(socket).emit('geometry_data', stream, { blocks: null });
 }
 */
+
+// entity movement; new_pos is a [x,y,z] array; speed is in units/sec
+EntityModuleAPI.prototype.moveEntity = function(entity_id, new_position, speed) {
+	var entity = this.environment.getEntityById(entity_id);
+	entity.evalPosition();
+	entity.state_counter++;
+	entity.target_position = new_position;
+	entity.last_eval_time = this.getTime();
+	entity.speed = speed;
+}
+
+
+
+
 
 // returns the time since server launch, in seconds
 EntityModuleAPI.prototype.getTime = function() {

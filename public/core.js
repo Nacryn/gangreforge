@@ -114,7 +114,31 @@ function mouseClick() {
     if(mesh.isPickable) { return true; }
   });
 
-  // console.log("clicked detected, mesh: "+pickResult.pickedMesh);
+  //console.log("clicked detected, mesh: "+pickResult.pickedMesh.name);
+
+  if(pickResult.hit) {
+
+    // if there's an entity id associated with the mesh, send back a click_entity event to the server
+    // note: this goes through the worker
+    if(pickResult.pickedMesh.entity_id) {
+      worker.postMessage({
+        type: 'dispatch_message',
+        name: 'click_entity',
+        entity_id: pickResult.pickedMesh.entity_id,
+        data: { click_position: pickResult.pickedPoint }  // we send the clicked point in the entity locak space
+      });
+    }
+
+    // no entity associated: we send a click_world event with the clicked point in global space
+    else {
+      worker.postMessage({
+        type: 'dispatch_message',
+        name: 'click_world',
+        data: { click_position: pickResult.pickedPoint }  // we send the clicked point in the entity locak space
+      });      
+    }
+
+  }
 
   /*
   if(pickResult.hit) {

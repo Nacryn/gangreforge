@@ -42,16 +42,16 @@ entity_module_builder.registerModule(
 
 				// TEMP!!
 				buffer.drawBox(
-					entity.position.x + Math.cos(this.API.getTime() * 1.7 + entity.position.z),
-					entity.position.y,
-					entity.position.z + Math.sin(this.API.getTime() * 1.3 + entity.position.x),
+					entity.position[0],
+					entity.position[1],
+					entity.position[2],
 					0.6, 0.4, 0.4,
 					1, 2, 1
 				);
 
 				//console.dir(entity.position);
 
-				//this.dirty = false;
+				this.dirty = false;
 
 				break;
 

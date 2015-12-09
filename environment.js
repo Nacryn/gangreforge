@@ -1,3 +1,5 @@
+var math = require('mathjs');
+
 
 // ****
 // ENTITY OBJECT
@@ -5,8 +7,46 @@
 
 function Entity(id) {
 	this.id = id;
-	this.position = {x: 0, y: 0, z: 0};
+	this.position = [0, 0, 0];
 	this.geometry_buffer = new GeometryBuffer();
+
+	// this is increased everytime the entity changes (ie position, movement)
+	// note: the geometry buffer also have this
+	this.state_counter = 0;
+
+	// this is for planned movement
+	this.target_position = [0, 0, 0];
+	this.last_eval_time = -1;
+	this.speed = 0;		// unit/sec (not used)
+}
+
+// simple update function
+Entity.prototype.update = function() {
+
+}
+
+// evaluate position based on planned movement
+Entity.prototype.evalPosition = function() {
+	if(this.last_eval_time > 0) {
+		var new_time = Date.now() * 0.001;
+		var diff = math.subtract(this.target_position, this.position);
+		var diff_len = math.norm(diff);
+		var step_dist = (new_time - this.last_eval_time) * this.speed;
+
+		if(step_dist >= diff_len) {
+			// we're there
+			this.position = this.target_position;
+			this.last_eval_time = -1;
+		} else {
+
+			// normalize & scale by speed
+			diff = math.dotDivide(diff, diff_len);
+			diff = math.dotMultiply(diff, step_dist);
+
+			this.position = math.add(this.position, diff);
+			this.last_eval_time = new_time;
+		}
+	}
 }
 
 
@@ -51,15 +91,15 @@ Environment.prototype.init = function() {
 
 	// add entities (temp)
 
-	this.createNewEntity("bob").position = {x: 4, y:0, z:0};
-	this.createNewEntity("bob2").position = {x: 4, y:0, z:4};
-	this.createNewEntity("test").position = {x: -4, y:0, z:4};
-	this.createNewEntity("aaaaaa").position = {x: -4, y:0, z:-4};
-	this.createNewEntity("aaaaaa2").position = {x: 4, y:0, z:-4};
-	this.createNewEntity("aaaaaa3").position = {x: 0, y:0, z:-4};
+	this.createNewEntity("bob").position = [4, 0, 0];
+	this.createNewEntity("bob2").position = [4, 0, 4];
+	this.createNewEntity("test").position = [-4, 0, 4];
+	this.createNewEntity("aaaaaa").position = [-4, 0, -4];
+	this.createNewEntity("aaaaaa2").position = [4, 0, -4];
+	this.createNewEntity("aaaaaa3").position = [0, 0, -4];
 
 	for(var i=0; i<100; i++) {
-		this.createNewEntity("entity"+i).position = {x: Math.random()*20-10 , y:0, z: Math.random()*20-10};
+		this.createNewEntity("entity"+i).position = [Math.random()*20-10, 0, Math.random()*20-10];
 		this.attachModuleToEntity("entity"+i, "appearance");
 	}
 
@@ -95,7 +135,10 @@ Environment.prototype.update = function() {
 	else { this.delta_time = now - this.last_update_time; }
 	this.last_update_time = now;
 
-	// update order
+	// update entities
+	for(entity_id in this.entities) { this.entities[entity_id].update(); }
+
+	// update order for modules
 	this.dispatchMessage("update", { time_delta: this.delta_time });
 
 	// refresh&send geometry order (require buffers to be set/reset)

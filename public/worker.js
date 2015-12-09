@@ -5,7 +5,7 @@ importScripts('lib/socket.io.js');
 var socket = io();
 
 // this is a collection of geometry blocks received by the worker
-// these blocks are received in bulks and must be passed on by one to the main thread
+// these blocks are received in bulks and must be streamed one by one to the main thread
 // the blocks ids are stored in another array
 var geometry_blocks_collection = new Array(100);
 var geometry_blocks_ids = new Array(100);
@@ -81,4 +81,31 @@ function streamGeometry() {
 
 }
 
+// launch the streaming job
 setTimeout(streamGeometry, 0);
+
+
+
+// MESSAGE HANDLER
+// mainly used to pass the man thread messages to the socket
+onmessage = function(msg) {
+
+	if(msg.data.type == 'dispatch_message') {
+
+		//console.log('[WORKER] dispatching message');
+
+		if(msg.data.entity_id) {
+			socket.emit('dispatch_message', {
+				name: msg.data.name,
+				entity_id: msg.data.entity_id,
+				data: msg.data.data
+			});
+		} else {
+			socket.emit('dispatch_message', {
+				name: msg.data.name,
+				data: msg.data.data
+			});
+		}
+	}
+
+};

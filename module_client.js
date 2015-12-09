@@ -48,6 +48,10 @@ entity_module_builder.registerModule(
 
 		module.socket = null;		// this must be set manually!
 
+		// for each entity that we sent to the client, save its state counter
+		// this way, we know if the entity data must be resent or not!
+		module.tracked_entities_collection = {};
+
 	},
 	
 	[]		// registered channels

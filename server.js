@@ -57,6 +57,18 @@ io.on('connection', function(socket) {
 		environment.deleteEntity("client"+socket.id);
 	});
 
+	socket.on('dispatch_message', function(msg) {
+
+		console.log('received a message to dispatch: '+msg.name);
+		//console.dir(msg);
+
+		if(msg.entity_id) {
+			environment.dispatchMessageToEntity(msg.entity_id, msg.name, msg.data);
+		} else {
+			environment.dispatchMessage(msg.name, msg.data);
+		}
+	});
+
 });
 
 

@@ -96,14 +96,14 @@ Environment.prototype.init = function() {
 	// add entities (temp)
 
 	this.createNewEntity("bob").position = [4, 0, 0];
-	this.createNewEntity("bob2").position = [4, 0, 4];
-	this.createNewEntity("test").position = [-4, 0, 4];
-	this.createNewEntity("aaaaaa").position = [-4, 0, -4];
-	this.createNewEntity("aaaaaa2").position = [4, 0, -4];
+	this.createNewEntity("bob2").position = [2, 0, 0];
+	this.createNewEntity("test").position = [0, 0, 4];
+	this.createNewEntity("aaaaaa").position = [0, 0, 2];
+	this.createNewEntity("aaaaaa2").position = [-4, 0, 0];
 	this.createNewEntity("aaaaaa3").position = [0, 0, -4];
 
-	for(var i=0; i<100; i++) {
-		this.createNewEntity("entity"+i).position = [Math.random()*20-10, 0, Math.random()*20-10];
+	for(var i=0; i<80; i++) {
+		this.createNewEntity("entity"+i).position = [Math.random()*40-20, 0, Math.random()*40-20];
 		this.attachModuleToEntity("entity"+i, "appearance");
 	}
 

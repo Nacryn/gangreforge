@@ -28,7 +28,7 @@ socket.on('rendering_data', function(msg) {
 				entity_id: msg[i].entity_id,
 				state: msg[i].state
 			};
-			entity_states.push(msg[i].state);
+			entity_states.push(entity_state);
 		}
 
 		// no geometry blocks for this entity: skip!
@@ -64,9 +64,15 @@ socket.on('rendering_data', function(msg) {
 			geometry_blocks_collection[index] = block;
 
 		}
-
 	}
-  
+
+	// send entity states
+	if(entity_states.length > 0) {
+		postMessage({
+			type: "entity_states",
+			entity_states: entity_states
+		});
+	}
 });
 
 // this is the recurring job that transmits geometry to the main thread one block at a time
@@ -88,7 +94,7 @@ function streamGeometry() {
 		  	type: "geometry_block",
 		  	block: block
 		});
-		console.log("[WORKER] streamed 1 block");
+		console.log("[WORKER] streamed 1 block, id="+block.id+" (entity_id="+block.entity_id+")");
 
 		// remove block of collection
 		geometry_blocks_ids[index] = null;

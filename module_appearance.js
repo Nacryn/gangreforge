@@ -27,9 +27,14 @@ entity_module_builder.registerModule(
 		// overriding respond function
 		module.respondToMessage = function(message, data) {
 
+			var entity = this.API.getEntityById(this.entity_id);
+
 			switch(message) {
 
 				case "update":
+
+				// Temp: always redrawn geometry
+				entity.geometry_changed = true;
 
 				break;
 
@@ -39,15 +44,14 @@ entity_module_builder.registerModule(
 				//if(!this.dirty) { break; }
 
 				var buffer = this.API.getGeometryBuffer(this.entity_id);
-				var entity = this.API.getEntityById(this.entity_id);
 
 				// TEMP!!
 				buffer.drawBox(
 					0,
 					0,
 					0,
-					0.6, 0.4, 0.4,
-					1, 2, 1
+					0.6 + 0.3 * Math.cos(Date.now()), 0.4, 0.4,
+					1, 2 + 0.7 * Math.cos(Date.now()), 1
 				);
 
 				//console.dir(entity.position);

@@ -161,8 +161,8 @@ GeometryHandler.prototype.injectGeometryBlock = function(geometry_block) {
 // in the entity state
 GeometryHandler.prototype.updateGeometryBlocks = function() {
 
-	var i, j;
-	var base_vertex;
+	var i, j, k;
+	var base_vertex, val, array;
 	var entity_state;
 	var block;
 
@@ -174,38 +174,56 @@ GeometryHandler.prototype.updateGeometryBlocks = function() {
 		// no block: skip
 		if(!block) { continue; }
 
+		entity_state = this.entities_collection[block.entity_id];
+
 		// if there is no entity state for this block, skip
-		if(!this.entities_collection[block.entity_id]) { continue; }
+		if(!entity_state) { continue; }
 
 		// there's an entity state: draw the geometry in the buffer
-		entity_state = this.entities_collection[block.entity_id];
 		base_vertex = i * GEOMETRYBLOCK_VERTEX_COUNT;
+		array = entity_state.position.asArray();
 		
 		// add normals only (these will not change over time)
 		for(j=0; j<GEOMETRYBLOCK_VERTEX_COUNT; j++) {
 
-			this.static_positions[base_vertex * 3 + j * 3] =
-				entity_state.position.x + block.target_positions[j * 3];
-			this.static_positions[base_vertex * 3 + j * 3 + 1] =
-				entity_state.position.y + block.target_positions[j * 3 + 1];
-			this.static_positions[base_vertex * 3 + j * 3 + 2] =
-				entity_state.position.z + block.target_positions[j * 3 + 2];
+			for(k=0; k<4; k++) {
 
-			this.static_colors[base_vertex * 4 + j * 4] = block.target_colors[j * 4];
-			this.static_colors[base_vertex * 4 + j * 4 + 1] = block.target_colors[j * 4 + 1];
-			this.static_colors[base_vertex * 4 + j * 4 + 2] = block.target_colors[j * 4 + 2];
-			this.static_colors[base_vertex * 4 + j * 4 + 3] = block.target_colors[j * 4 + 3];
+				val = this.static_colors[base_vertex * 4 + j * 4 + k];
+				this.static_colors[base_vertex * 4 + j * 4 + k] =
+					interpolate(val, block.target_colors[j * 4 + k], 0.3);
+
+				if(k==3) { break; }
+
+				val = this.static_positions[base_vertex * 3 + j * 3 + k] - array[k];
+				this.static_positions[base_vertex * 3 + j * 3 + k] = array[k] +
+					interpolate(val, block.target_positions[j * 3 + k], 0.3);
+
+			}
 			
 		}
 	}
 
 	// update entity states
-	// TEMP: no interpolation
+	var diff = new BABYLON.Vector3(), diff_len, step_dist;
 	for(var entity_id in this.entities_collection) {
 
 		entity_state = this.entities_collection[entity_id];
 
+		// skip if no movement undergoing
+		if(!entity_state.target_position) { continue; }
+
 		// update entity position
+		entity_state.target_position.subtractToRef(entity_state.position, diff);
+		diff_len = diff.length();
+		step_dist = engine.getDeltaTime()*0.001 * entity_state.speed;
+
+		if(step_dist >= diff_len) {
+			entity_state.position = entity_state.target_position;
+			entity_state.target_position = null;
+		} else {
+			diff.normalize().scaleInPlace(step_dist);
+			entity_state.position.addInPlace(diff);
+		}
 		//entity_state.position = entity_state.target_position;
 		//delete this.entities_collection[entity_id];
 	}

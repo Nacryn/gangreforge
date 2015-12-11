@@ -83,7 +83,7 @@ entity_module_builder.registerModule(
 				// the user clicked on the ground: go there
 				case "click_world":
 
-				this.API.moveEntity(this.entity_id, data.click_position, 1);
+				this.API.moveEntity(this.entity_id, data.click_position, 5);
 
 				break;
 

@@ -207,6 +207,10 @@ function clamp(value, min, max) {
 	return Math.max(min, Math.min(max, value));
 }
 
+function interpolate(start, end, ratio) {
+	return start * (1-ratio) + end * ratio;
+}
+
 function getScreenPos(worldPos) {
 	var result = BABYLON.Vector3.Project(
 		worldPos,

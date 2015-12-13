@@ -3,7 +3,9 @@ var engine;
 var scene;
 var camera;
 var time;
-var geometry_handler;
+var entities_renderer;
+var socket = io();
+var hovered_mesh;
 
 // window events
 
@@ -56,8 +58,8 @@ function initScene() {
 	ground.bakeCurrentTransformIntoVertices();
 	ground.isVisible = false;
 
-	// geometry handler
-	geometry_handler = new GeometryHandler();
+	// entities renderer
+	entities_renderer = new EntitiesRenderer();
 
 	// temp
 	BABYLON.Mesh.CreateBox("box", 0.2, scene);
@@ -78,24 +80,29 @@ function renderLoop() {
 function updateLoop() {
 	time += engine.getDeltaTime()*0.001;
 
-	// refresh the whole geometry
-	geometry_handler.update();
+	// refresh the meshes
+	entities_renderer.update();
 
 	// check what's under the cursor
 	// temp: should not be handled that way
 	var pickResult = scene.pick(scene.pointerX, scene.pointerY, function(mesh) {
 		if(mesh.isPickable) { return true; }
 	});
-	if(pickResult.hit) {
-		/*
-		if(pickResult.pickedMesh.entity_id) {
-			this.dispatchMessageToEntity(
-				pickResult.pickedMesh.entity_id, "hover_entity",
-				{ click_position: pickResult.pickedPoint }
-			);
-		}
-		*/
+
+	// reset previously picked mesh material
+	if(hovered_mesh && hovered_mesh != pickResult.pickedMesh) {
+		hovered_mesh.material = entities_renderer.default_material;
 	}
+
+	// assign new material
+	if(pickResult.hit) {
+		hovered_mesh = pickResult.pickedMesh;
+		hovered_mesh.material = entities_renderer.hovered_material;
+	} else {
+		hovered_mesh = null;
+	}
+
+	//if(hovered_mesh) { console.log('hovered: '+hovered_mesh.name); }
 
 }
 
@@ -122,8 +129,8 @@ function mouseClick() {
 	if(pickResult.hit) {
 
 		// if there's an entity id associated with the mesh, send back a click_entity event to the server
-		// note: this goes through the worker
 		if(pickResult.pickedMesh.entity_id) {
+			/*
 			worker.postMessage({
 				type: 'dispatch_message',
 				name: 'click_entity',
@@ -134,10 +141,24 @@ function mouseClick() {
 					pickResult.pickedPoint.z
 				] }  
 			});
+			*/
+			socket.emit('dispatch_message', {
+				name: 'click_entity',
+				entity_id: pickResult.pickedMesh.entity_id,
+				data: {
+					click_position: [
+						pickResult.pickedPoint.x,  // we send the clicked point in the entity local space
+						pickResult.pickedPoint.y,
+						pickResult.pickedPoint.z
+					],
+					message: pickResult.pickedMesh.click_message
+				}
+			});
 		}
 
 		// no entity associated: we send a click_world event with the clicked point in global space
 		else {
+			/*
 			worker.postMessage({
 				type: 'dispatch_message',
 				name: 'click_world',
@@ -146,7 +167,18 @@ function mouseClick() {
 					pickResult.pickedPoint.y,
 					pickResult.pickedPoint.z
 				] }
-			});      
+			});    
+			*/
+			socket.emit('dispatch_message', {
+				name: 'click_world',
+				data: {
+					click_position: [
+						pickResult.pickedPoint.x,
+						pickResult.pickedPoint.y,
+						pickResult.pickedPoint.z
+					]
+				}
+			});  
 		}
 
 	}
@@ -171,8 +203,24 @@ function mouseClick() {
 }
 
 
-// INTERFACE WITH WORKER
+// SOCKETS INTERFACE
 
+socket.on('entity_data', function(msg) {
+
+	//console.dir(msg);
+	console.log('received data for '+msg.length+' entities');
+
+	if(!entities_renderer) { return; }
+
+	for(var i=0; i<msg.length; i++) {
+		entities_renderer.injectEntityData(msg[i].entity_id, msg[i].entity_data);
+	}
+
+});
+
+
+// INTERFACE WITH WORKER
+/*
 var worker = new Worker("worker.js");
 
 worker.onmessage = function(msg) {
@@ -192,6 +240,7 @@ worker.onmessage = function(msg) {
 		}
 	}
 };
+*/
 
 
 // utils

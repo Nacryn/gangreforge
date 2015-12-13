@@ -34,11 +34,13 @@ entity_module_builder.registerModule(
 				case "update":
 
 				// Temp: always redrawn geometry
-				entity.geometry_changed = true;
+				//entity.geometry_changed = true;
 
 				break;
 
 				// refresh geometry based on instructions list (if it has changed)
+				// NOT USED ANYMORE
+				/*
 				case "refresh_geometry":
 
 				//if(!this.dirty) { break; }
@@ -59,9 +61,22 @@ entity_module_builder.registerModule(
 				//this.dirty = false;
 
 				break;
+				*/
 
 
 			}
+
+		};
+
+		// override render function
+		module.appendDrawingInstructions = function(instructions_list) {
+
+			// temp
+			this.API.drawBox(instructions_list,
+					0, 0, 0,
+					0, 0, 0,
+					2, 3, 2,
+					0.8, 0.6, 0.6);
 
 		};
 
@@ -74,7 +89,7 @@ entity_module_builder.registerModule(
 			"move 0 1 0\n"+
 			"box 1 0.7 1";
 
-		// drawing instructions list (refreshed on each edit)
+		// generated drawing instructions list (refreshed on each edit)
 		module.instructions = [];
 
 		// this is the current drawing state (translation, color, rotation, scale...)

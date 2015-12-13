@@ -13,10 +13,13 @@ function EntityModule(entity_module_api) {
 	// a reference to the module API
 	this.API = entity_module_api;
 
-	// this functions has to be overriden to implement custom behavior
+	// this function has to be overriden to implement custom behavior
 	// message is a string and data is an object
 	this.respondToMessage = function(message, data) {};
 
+	// this function has to be overriden to implement rendering
+	// drawing instructions must be added to the list with the API 
+	this.appendDrawingInstructions = function(instructions_list) {};
 }
 
 

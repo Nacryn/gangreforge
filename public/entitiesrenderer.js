@@ -97,6 +97,7 @@ EntitiesRenderer.prototype.updateEntitiesMeshes = function() {
 		entity.mesh.position = entity.position;
 
 		if(!entity.drawing_instructions) { continue; }
+		if(!scene.isActiveMesh(entity.mesh)) { continue; }
 
 		// update buffers
 		vertex_offset = 0;

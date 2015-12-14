@@ -107,7 +107,7 @@ Environment.prototype.init = function() {
 	this.createNewEntity("aaaaaa2").position = [-4, 0, 0];
 	this.createNewEntity("aaaaaa3").position = [0, 0, -4];
 
-	for(var i=0; i<30; i++) {
+	for(var i=0; i<50; i++) {
 		this.createNewEntity("entity"+i).position = [Math.random()*40-20, 0, Math.random()*40-20];
 		this.attachModuleToEntity("entity"+i, "appearance");
 	}

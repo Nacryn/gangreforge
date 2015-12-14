@@ -8,7 +8,24 @@ entity_module_builder.registerModule(
 	function(module) {
 
 		// overriding respond function
-		module.respondToMessage = function(message, data) {};
+		this.respondToMessage = function(message, data) {
+
+			switch(message) {
+
+				// inspector panel request
+				// we send back to the socket the contents of our block
+				case "inspector_panel":
+				data.socket.emit("inspector_panel_block", {
+					elements: [
+						this.API.outputPlainText("This is a blank module")
+					],
+					rank: this.rank
+				});
+				break;
+
+			}
+
+		};
 
 	},
 	

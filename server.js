@@ -61,6 +61,7 @@ io.on('connection', function(socket) {
 
 		console.log('received a message to dispatch: '+msg.name);
 		//console.dir(msg);
+		msg.data.socket = this;
 
 		if(msg.entity_id) {
 			environment.dispatchMessageToEntity(msg.entity_id, msg.name, msg.data);

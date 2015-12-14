@@ -15,10 +15,6 @@ entity_module_builder.registerModule(
 
 			switch(message) {
 
-				// send nearby geometry blocks to the client we're attached to
-				//case "send_geometry":
-
-
 				// regularly send new data on update event
 				case "update":
 
@@ -41,7 +37,6 @@ entity_module_builder.registerModule(
 
 					// skip if no state changed
 					if(recorded_entity && recorded_entity.entity_state == nearby_entity.state_counter && !full_refresh) {
-						//recorded_entity.geometry_state == nearby_entity.geometry_buffer.state_counter) {
 						continue;
 					}
 
@@ -49,7 +44,6 @@ entity_module_builder.registerModule(
 					if(!recorded_entity) {
 						recorded_entity = {
 							entity_state: -1
-							//geometry_state: -1
 						};
 						this.tracked_entities_collection[nearby_entity.id] = recorded_entity;
 					}
@@ -74,30 +68,12 @@ entity_module_builder.registerModule(
 					// add to stream
 					stream_data.push({ entity_id: nearby_entity.id, entity_data: entity_data });
 
-					// send geometry state
-					/*
-					if(!entity_data || entity_data.geometry_state != nearby_entity.geometry_buffer.state_counter) {
-						stream_object.blocks = nearby_entity.geometry_buffer.appendBlocksData([]);
-						entity_data.geometry_state = nearby_entity.geometry_buffer.state_counter;
-					}
-					*/
-
-
-					//nearby_entities[i].geometry_buffer.appendBlocksData(stream_data.blocks);
-
-					// this.socket.emit('geometry_data', {
-					// 	blocks: nearby_entities[i].geometry_buffer.appendBlocksData([])
-					// });
 				}
 
 				//send collected entities data to the client
 				if(stream_data.length > 0) {
 					this.socket.emit('entity_data', stream_data);
 				}
-				
-				//this.API.streamData(this.socket, stream_data);
-
-				//console.log('i just sent '+blocks.length+' blocks (nearby = '+nearby_entities.length+')');
 
 				break;
 
@@ -109,6 +85,16 @@ entity_module_builder.registerModule(
 
 				break;
 
+				// inspector panel request
+				// we send back to the socket the contents of our block
+				case "inspector_panel":
+				data.socket.emit("inspector_panel_block", {
+					elements: [
+						this.API.outputPlainText("This is a blank module")
+					],
+					rank: this.rank
+				});
+				break;
 			}
 
 		};

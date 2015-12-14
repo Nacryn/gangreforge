@@ -24,6 +24,9 @@ function Entity(id) {
 	this.target_position = [0, 0, 0];
 	this.last_eval_time = -1;
 	this.speed = 0;		// unit/sec (not used)
+
+	// amount of modules attached; used to determine rank
+	this.module_count = 0;
 }
 
 // simple update function
@@ -184,6 +187,7 @@ Environment.prototype.attachModuleToEntity = function(entity_id, module_name) {
 	var module = this.module_builder.createModule(module_name);
 	if(module) {
 		module.entity_id = entity_id;
+		module.rank = this.entities[entity_id].module_count++;
 		this.entity_modules.push(module);
 	}
 	return module;

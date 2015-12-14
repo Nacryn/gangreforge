@@ -32,37 +32,19 @@ entity_module_builder.registerModule(
 			switch(message) {
 
 				case "update":
-
-				// Temp: always redrawn geometry
-				//entity.geometry_changed = true;
-
 				break;
 
-				// refresh geometry based on instructions list (if it has changed)
-				// NOT USED ANYMORE
-				/*
-				case "refresh_geometry":
-
-				//if(!this.dirty) { break; }
-
-				var buffer = this.API.getGeometryBuffer(this.entity_id);
-
-				// TEMP!!
-				buffer.drawBox(
-					0,
-					0,
-					0,
-					0.6 + 0.3 * Math.cos(Date.now()), 0.4, 0.4,
-					1, 2 + 0.7 * Math.cos(Date.now()), 1
-				);
-
-				//console.dir(entity.position);
-
-				//this.dirty = false;
-
+				// inspector panel request
+				// we send back to the socket the contents of our block
+				case "inspector_panel":
+				data.socket.emit("inspector_panel_block", {
+					elements: [
+						this.API.outputPlainText("This is the code that defines what gets drawn."),
+						this.API.outputEditableCode("appearance_code", this.input_code)
+					],
+					rank: this.rank
+				});
 				break;
-				*/
-
 
 			}
 
@@ -73,10 +55,10 @@ entity_module_builder.registerModule(
 
 			// temp
 			this.API.drawBox(instructions_list,
-					0, 0, 0,
-					0, 0, 0,
-					2, 3, 2,
-					0.8, 0.6, 0.6);
+				0, 0, 0,
+				0, 0, 0,
+				2, 3, 2,
+				0.8, 0.6, 0.6);
 
 		};
 
@@ -94,9 +76,9 @@ entity_module_builder.registerModule(
 
 		// this is the current drawing state (translation, color, rotation, scale...)
 		module.translation = {x:0, y:0, z:0};
+		module.rotation = {x:0, y:0, z:0};
 		module.draw_color = {r:0, g:0, b:0};		// alpha not supported
 
-		//module.dirty = true;
 	},
 	
 	[]		// registered channels

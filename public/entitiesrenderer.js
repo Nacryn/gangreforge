@@ -52,7 +52,7 @@ EntitiesRenderer.prototype.injectEntityData = function(entity_id, entity_data) {
 	this.entities_collection[entity_id].mesh.setVerticesData(BABYLON.VertexBuffer.ColorKind, this.entities_collection[entity_id].colors, true);
 	this.entities_collection[entity_id].mesh.setIndices(this.entities_collection[entity_id].indices);
 	this.entities_collection[entity_id].mesh.material = this.default_material;
-	//this.entities_collection[entity_id].mesh.isPickable = true;
+	this.entities_collection[entity_id].mesh.entity_id = entity_id;
 };
 
 // update each entities mesh according to its drawing instructions, and set position

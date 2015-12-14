@@ -88,6 +88,38 @@ EntityModuleAPI.prototype.getTime = function() {
 
 
 // *****
+// DOM FUNCTIONS
+// *****
+
+// used to add elements to inspector panel or modal menus
+// when the inspector panel is displayed, modules receive a "inspector_panel" event
+// they then must send back a list of controls to display
+// when one of the controls is changed, the module receive a "inspector_panel_change" event
+// with data.name and data.value set according to the touched control
+
+EntityModuleAPI.prototype.outputMarkdown = function(content) {
+	return ["markdown", "", content];
+};
+EntityModuleAPI.prototype.outputCode = function(content) {
+	return ["code", "", content];
+};
+EntityModuleAPI.prototype.outputPlainText = function(content) {
+	return ["text", "", content];
+};
+EntityModuleAPI.prototype.outputEditableText = function(name, content) {
+	return ["editable_text", name, content];
+};
+//EntityModuleAPI.prototype.outputHeader = function(block, content) {
+//
+//};
+EntityModuleAPI.prototype.outputEditableCode = function(name, content) {
+	return ["editable_code", "", content];
+};
+
+
+
+
+// *****
 // DRAWING INSTRUCTIONS
 // *****
 

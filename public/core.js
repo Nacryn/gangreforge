@@ -143,7 +143,8 @@ function mouseClick() {
 			});
 			*/
 			socket.emit('dispatch_message', {
-				name: 'click_entity',
+				//name: 'click_entity',
+				name: 'inspector_panel',
 				entity_id: pickResult.pickedMesh.entity_id,
 				data: {
 					click_position: [
@@ -215,6 +216,12 @@ socket.on('entity_data', function(msg) {
 	for(var i=0; i<msg.length; i++) {
 		entities_renderer.injectEntityData(msg[i].entity_id, msg[i].entity_data);
 	}
+
+});
+
+socket.on('inspector_panel_block', function(msg) {
+
+	console.dir(msg);
 
 });
 

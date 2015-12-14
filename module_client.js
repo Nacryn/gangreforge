@@ -26,6 +26,7 @@ entity_module_builder.registerModule(
 				}
 
 				var nearby_entities = this.API.getNearbyEntities(this.entity_id);
+				var my_entity = this.API.getEntityById(this.entity_id);
 				var stream_data = [];
 				var drawing_instructions, modules;
 				var i, j;
@@ -54,6 +55,10 @@ entity_module_builder.registerModule(
 					entity_data.position = nearby_entity.position;
 					entity_data.target_position = nearby_entity.target_position;
 					entity_data.speed = nearby_entity.speed;
+
+					if(nearby_entity == my_entity) {
+						entity_data.focus = true;
+					}
 
 					// save entity state on module
 					recorded_entity.entity_state = nearby_entity.state_counter;

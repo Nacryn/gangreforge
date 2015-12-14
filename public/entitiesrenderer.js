@@ -45,6 +45,7 @@ EntitiesRenderer.prototype.injectEntityData = function(entity_id, entity_data) {
 	this.entities_collection[entity_id].target_position = new BABYLON.Vector3(entity_data.target_position[0], entity_data.target_position[1], entity_data.target_position[2]);
 	this.entities_collection[entity_id].speed = entity_data.speed;
 	this.entities_collection[entity_id].drawing_instructions = entity_data.drawing_instructions;
+	if(entity_data.focus) { camera.target = this.entities_collection[entity_id].mesh; }
 
 	this.entities_collection[entity_id].mesh.setVerticesData(BABYLON.VertexBuffer.PositionKind, this.entities_collection[entity_id].positions, true);
 	this.entities_collection[entity_id].mesh.setVerticesData(BABYLON.VertexBuffer.NormalKind, this.entities_collection[entity_id].normals, true);

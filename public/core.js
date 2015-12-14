@@ -130,21 +130,8 @@ function mouseClick() {
 
 		// if there's an entity id associated with the mesh, send back a click_entity event to the server
 		if(pickResult.pickedMesh.entity_id) {
-			/*
-			worker.postMessage({
-				type: 'dispatch_message',
-				name: 'click_entity',
-				entity_id: pickResult.pickedMesh.entity_id,
-				data: { click_position: [
-					pickResult.pickedPoint.x,  // we send the clicked point in the entity local space
-					pickResult.pickedPoint.y,
-					pickResult.pickedPoint.z
-				] }  
-			});
-			*/
-			socket.emit('request_inspector_panel', {
-				entity_id: pickResult.pickedMesh.entity_id
-			});
+
+			requestInspectorPanel(pickResult.pickedMesh.entity_id);
 
 			// socket.emit('dispatch_message', {
 			// 	name: 'click_entity',
@@ -162,17 +149,6 @@ function mouseClick() {
 
 		// no entity associated: we send a click_world event with the clicked point in global space
 		else {
-			/*
-			worker.postMessage({
-				type: 'dispatch_message',
-				name: 'click_world',
-				data: { click_position: [
-					pickResult.pickedPoint.x,
-					pickResult.pickedPoint.y,
-					pickResult.pickedPoint.z
-				] }
-			});    
-			*/
 			socket.emit('dispatch_message', {
 				name: 'click_world',
 				data: {
@@ -183,27 +159,33 @@ function mouseClick() {
 					]
 				}
 			});  
+
+			hideInspectorPanel();
 		}
 
 	}
+}
 
-	/*
-	if(pickResult.hit) {
+var displayed_entity_id = null;
+function requestInspectorPanel(entity_id) {
+	displayed_entity_id = entity_id;	
+	socket.emit('request_inspector_panel', {
+		entity_id: entity_id
+	});
+}
+function hideInspectorPanel() {
+	displayed_entity_id = null;
 
-		if(pickResult.pickedMesh.entity_id) {
-			environment.dispatchMessageToEntity(
-				pickResult.pickedMesh.entity_id, "click_entity",
-				{ click_position: pickResult.pickedPoint }
-			)
-		} else {
-			EntityModuleAPI.hideEntityPanel();
-		}
+	var panel = document.getElementById("entity_panel");
+	panel.style.display = "none";
 
-		if(pickResult.pickedMesh.name == "ground_plane") {
-			environment.dispatchMessage("click_ground", { click_position: pickResult.pickedPoint });
+	// delete all existing module blocks inside
+	for(var i=0; i<panel.children.length; i++) {
+		if(panel.children[i].className == "module_block") {
+			panel.removeChild(panel.children[i]);
+			i--;
 		}
 	}
-	*/
 }
 
 
@@ -224,7 +206,7 @@ socket.on('entity_data', function(msg) {
 
 socket.on('inspector_panel_structure', function(msg) {
 
-	console.dir(msg);
+	//console.dir(msg);
 
 	// we received the inspector panel structure, let's display it
 	var panel = document.getElementById("entity_panel");
@@ -262,32 +244,68 @@ socket.on('inspector_panel_block', function(msg) {
 
 	//console.dir(msg);
 
+	// we received the content of a block in the inspector panel, let's display it
+	var block = document.getElementById("module_rank"+msg.rank);
+
+	if(!block) { return; }
+
+	var type, name, content;
+	var el;
+	for(var i=0; i<msg.elements.length; i++) {
+
+		type = msg.elements[i][0];
+		name = msg.elements[i][1];
+		content = msg.elements[i][2];
+
+		switch(type) {
+
+			case "text":
+			el = document.createElement("p");
+			el.className = "text";
+			el.appendChild(document.createTextNode(content));
+			break;
+
+			case "editable_text":
+			el = document.createElement("textarea");
+			el.name = name;
+			el.className = "text";
+			el.setAttribute("rows", 10);	// todo: dynamic resize
+			el.setAttribute("cols", 30);
+			el.value = content;
+			break;
+
+			case "code":
+			el = document.createElement("pre");
+			el.name = name;
+			el.className = "codeblock";
+			el.appendChild(document.createTextNode(content));
+			break;
+
+			case "editable_code":
+			el = document.createElement("textarea");
+			el.name = name;
+			el.className = "codeblock";
+			el.setAttribute("rows", 10);	// todo: dynamic resize
+			el.setAttribute("cols", 30);
+			el.value = content;
+
+			// add change listener
+			var callback = function() {
+				socket.emit('inspector_panel_change', {});
+			}
+			el.addEventListener('keyup', callback);
+			el.addEventListener('change', callback);
+			break;
+
+			case "markdown":
+			break;
+		}
+
+		block.appendChild(el); 
+
+	}
 
 });
-
-
-// INTERFACE WITH WORKER
-/*
-var worker = new Worker("worker.js");
-
-worker.onmessage = function(msg) {
-	//console.dir(msg);
-
-	if(msg.data.type == "geometry_block") {
-		geometry_handler.injectGeometryBlock(msg.data.block);
-	} else if(msg.data.type == "entity_states") {
-		var i;
-		for(i=0; i<msg.data.entity_states.length; i++) {
-			geometry_handler.addEntityState(
-				msg.data.entity_states[i].entity_id,
-				msg.data.entity_states[i].state.position,
-				msg.data.entity_states[i].state.target_position,
-				msg.data.entity_states[i].state.speed
-			);
-		}
-	}
-};
-*/
 
 
 // utils

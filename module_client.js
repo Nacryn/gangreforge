@@ -6,7 +6,7 @@ module.exports = function(entity_module_builder) {
 entity_module_builder.registerModule(
 
 	"client",
-	"this module handles client interaction in the scene and sends environment update through the client socket",
+	"this module handles client interaction and data exchange with the scene",
 
 	function(module) {
 
@@ -95,7 +95,7 @@ entity_module_builder.registerModule(
 				case "inspector_panel":
 				data.socket.emit("inspector_panel_block", {
 					elements: [
-						this.API.outputPlainText("This is a blank module")
+						this.API.outputPlainText("Socket id: "+this.socket.id)
 					],
 					rank: this.rank
 				});

@@ -57,10 +57,26 @@ body {
 	color: white;
 	padding: 8px;
 	margin: 8px;
+	position: relative;
 
 
 	p {
-		margin-bottom: 0px
+		margin-bottom: 0px;
+
+		&.description {
+		    position: absolute;
+		    top: -2px;
+		    left: 100%;
+		    width: 130px;
+		    pointer-events: none;
+		    margin: 0px 0px 0px 10px;
+		    background-color: white;
+		    color: black;
+		    border-radius: 8px;
+		    padding: 6px;
+		    font-size: 0.9em;
+		    opacity: 0.2;
+		}
 	}
 
 	.codeblock {

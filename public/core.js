@@ -226,11 +226,42 @@ socket.on('inspector_panel_structure', function(msg) {
 
 	console.dir(msg);
 
+	// we received the inspector panel structure, let's display it
+	var panel = document.getElementById("entity_panel");
+	panel.style.display = "block";
+
+	// delete all existing module blocks inside
+	for(var i=0; i<panel.children.length; i++) {
+		if(panel.children[i].className == "module_block") {
+			panel.removeChild(panel.children[i]);
+			i--;
+		}
+	}
+
+	// add new blocks corresponding to the specified entity
+	var newblock, child;
+	for(var i=0; i<msg.length; i++) {
+		newblock = document.createElement("div");
+		newblock.className = "module_block";
+		newblock.id = "module_rank"+msg[i].rank;
+		panel.appendChild(newblock);
+
+		child = document.createElement("h1");
+		child.appendChild(document.createTextNode("#"+msg[i].rank+" "+msg[i].name));
+		newblock.appendChild(child);
+
+		child = document.createElement("p");
+		child.className = "description";
+		child.appendChild(document.createTextNode(msg[i].description));
+		newblock.appendChild(child);
+	}
+
 });
 
 socket.on('inspector_panel_block', function(msg) {
 
-	console.dir(msg);
+	//console.dir(msg);
+
 
 });
 

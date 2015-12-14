@@ -142,19 +142,22 @@ function mouseClick() {
 				] }  
 			});
 			*/
-			socket.emit('dispatch_message', {
-				//name: 'click_entity',
-				name: 'inspector_panel',
-				entity_id: pickResult.pickedMesh.entity_id,
-				data: {
-					click_position: [
-						pickResult.pickedPoint.x,  // we send the clicked point in the entity local space
-						pickResult.pickedPoint.y,
-						pickResult.pickedPoint.z
-					],
-					message: pickResult.pickedMesh.click_message
-				}
+			socket.emit('request_inspector_panel', {
+				entity_id: pickResult.pickedMesh.entity_id
 			});
+
+			// socket.emit('dispatch_message', {
+			// 	name: 'click_entity',
+			// 	entity_id: pickResult.pickedMesh.entity_id,
+			// 	data: {
+			// 		click_position: [
+			// 			pickResult.pickedPoint.x,  // we send the clicked point in the entity local space
+			// 			pickResult.pickedPoint.y,
+			// 			pickResult.pickedPoint.z
+			// 		],
+			// 		message: pickResult.pickedMesh.click_message
+			// 	}
+			// });
 		}
 
 		// no entity associated: we send a click_world event with the clicked point in global space
@@ -216,6 +219,12 @@ socket.on('entity_data', function(msg) {
 	for(var i=0; i<msg.length; i++) {
 		entities_renderer.injectEntityData(msg[i].entity_id, msg[i].entity_data);
 	}
+
+});
+
+socket.on('inspector_panel_structure', function(msg) {
+
+	console.dir(msg);
 
 });
 

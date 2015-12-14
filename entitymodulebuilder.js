@@ -77,8 +77,14 @@ EntityModuleBuilder.prototype.createModule = function(module_name) {
 	// module creation
 	var new_module = new EntityModule(this.module_api);
 	this.module_build_functions[module_name](new_module);
+	new_module.name = module_name;
 
 	return new_module;
+};
+
+// returns the module type description
+EntityModuleBuilder.prototype.getDescription = function(module_name) {
+	return this.module_descriptions[module_name];
 };
 
 // this is used to register custom modules in the builder

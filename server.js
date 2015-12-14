@@ -61,13 +61,32 @@ io.on('connection', function(socket) {
 
 		console.log('received a message to dispatch: '+msg.name);
 		//console.dir(msg);
-		msg.data.socket = this;
+		msg.data.socket = socket;
 
 		if(msg.entity_id) {
 			environment.dispatchMessageToEntity(msg.entity_id, msg.name, msg.data);
 		} else {
 			environment.dispatchMessage(msg.name, msg.data);
 		}
+	});
+
+	socket.on('request_inspector_panel', function(msg) {
+
+		// send general panel structure
+		var modules = environment.getModulesList(msg.entity_id);
+		var structure = [];
+		for(var i=0; i<modules.length; i++) {
+			structure[i] = {
+				rank: modules[i].rank,
+				name: modules[i].name,
+				description: entity_module_builder.getDescription(modules[i].name)
+			};
+		}
+		socket.emit('inspector_panel_structure', structure);
+		
+		// ask for individual blocks
+		msg.data = { socket: socket };
+		environment.dispatchMessageToEntity(msg.entity_id, "inspector_panel", msg.data);
 	});
 
 });

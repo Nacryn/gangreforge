@@ -37,15 +37,14 @@ EntitiesRenderer.prototype.injectEntityData = function(entity_id, entity_data) {
 			normals: new Float32Array(900),
 			colors: new Float32Array(900),
 			indices: new Uint8Array(300),
-			data: null
+			position: new BABYLON.Vector3(entity_data.position[0], entity_data.position[1], entity_data.position[2]),
+			velocity: new BABYLON.Vector3(0, 0, 0)
 		};
 	}
-	this.entities_collection[entity_id].data = {
-		position: new BABYLON.Vector3(entity_data.position[0], entity_data.position[1], entity_data.position[2]),
-		target_position: new BABYLON.Vector3(entity_data.target_position[0], entity_data.target_position[1], entity_data.target_position[2]),
-		speed: entity_data.speed,
-		drawing_instructions: entity_data.drawing_instructions
-	}
+	//position: new BABYLON.Vector3(entity_data.position[0], entity_data.position[1], entity_data.position[2]),
+	this.entities_collection[entity_id].target_position = new BABYLON.Vector3(entity_data.target_position[0], entity_data.target_position[1], entity_data.target_position[2]);
+	this.entities_collection[entity_id].speed = entity_data.speed;
+	this.entities_collection[entity_id].drawing_instructions = entity_data.drawing_instructions;
 
 	this.entities_collection[entity_id].mesh.setVerticesData(BABYLON.VertexBuffer.PositionKind, this.entities_collection[entity_id].positions, true);
 	this.entities_collection[entity_id].mesh.setVerticesData(BABYLON.VertexBuffer.NormalKind, this.entities_collection[entity_id].normals, true);
@@ -67,30 +66,43 @@ EntitiesRenderer.prototype.updateEntitiesMeshes = function() {
 
 		entity = this.entities_collection[entity_id];
 
-		if(entity.data.speed > 0) {
+		// update velocity vector based on speed & target pos
+		entity.target_position.subtractToRef(entity.position, diff);
+		diff_len = diff.length();
+		step_dist = engine.getDeltaTime()*0.001 * entity.speed;
+		if(diff_len > step_dist) {
+			diff.normalize().scaleInPlace(step_dist);
+		}
+
+		entity.velocity = BABYLON.Vector3.Lerp(entity.velocity, diff, 0.6);
+		entity.position.addInPlace(entity.velocity);
+		//entity.velocity.scaleInPlace(0.9);
+		/*
+		if(entity.speed > 0) {
 			// update entity position
-			entity.data.target_position.subtractToRef(entity.data.position, diff);
+			entity.target_position.subtractToRef(entity.position, diff);
 			diff_len = diff.length();
-			step_dist = engine.getDeltaTime()*0.001 * entity.data.speed;
+			step_dist = engine.getDeltaTime()*0.001 * entity.speed;
 
 			if(step_dist >= diff_len) {
-				entity.data.position = entity.data.target_position;
-				//entity.data.target_position = null;
+				entity.position = entity.target_position;
+				//entity.target_position = null;
 			} else {
 				diff.normalize().scaleInPlace(step_dist);
-				entity.data.position.addInPlace(diff);
+				entity.position.addInPlace(diff);
 			}
 		}
-		entity.mesh.position = entity.data.position;
+		*/
+		entity.mesh.position = entity.position;
 
-		if(!entity.data.drawing_instructions) { continue; }
+		if(!entity.drawing_instructions) { continue; }
 
 		// update buffers
 		vertex_offset = 0;
 		index_offset = 0;
-		for(i=0; i<entity.data.drawing_instructions.length; i++) {
+		for(i=0; i<entity.drawing_instructions.length; i++) {
 			result = this.applyDrawInstruction(
-				entity.data.drawing_instructions[i],
+				entity.drawing_instructions[i],
 				entity.positions, entity.normals, entity.colors, entity.indices,
 				vertex_offset, index_offset
 			);

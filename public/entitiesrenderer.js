@@ -168,8 +168,8 @@ EntitiesRenderer.prototype.applyDrawInstruction = function(params, mesh, pos, no
 		pos[v+0]= sx/2+x; nor[v+0]= 1; pos[v+1]= sy/2+y; nor[v+1]= 0; pos[v+2]=-sz/2+z; nor[v+2]= 0; v+=3;
 		pos[v+0]= sx/2+x; nor[v+0]= 1; pos[v+1]=-sy/2+y; nor[v+1]= 0; pos[v+2]=-sz/2+z; nor[v+2]= 0; v+=3;
 		pos[v+0]= sx/2+x; nor[v+0]= 1; pos[v+1]=-sy/2+y; nor[v+1]= 0; pos[v+2]= sz/2+z; nor[v+2]= 0; v+=3;
-		pos[v+0]=-sx/2+x; nor[v+0]=-1; pos[v+1]=-sy/2+y; nor[v+1]= 0; pos[v+2]=-sz/2+z; nor[v+2]= 0; v+=3;
 		pos[v+0]=-sx/2+x; nor[v+0]=-1; pos[v+1]=-sy/2+y; nor[v+1]= 0; pos[v+2]= sz/2+z; nor[v+2]= 0; v+=3;
+		pos[v+0]=-sx/2+x; nor[v+0]=-1; pos[v+1]=-sy/2+y; nor[v+1]= 0; pos[v+2]=-sz/2+z; nor[v+2]= 0; v+=3;
 		pos[v+0]=-sx/2+x; nor[v+0]=-1; pos[v+1]= sy/2+y; nor[v+1]= 0; pos[v+2]=-sz/2+z; nor[v+2]= 0; v+=3;
 		pos[v+0]=-sx/2+x; nor[v+0]=-1; pos[v+1]= sy/2+y; nor[v+1]= 0; pos[v+2]= sz/2+z; nor[v+2]= 0; v+=3;
 		pos[v+0]= sx/2+x; nor[v+0]= 0; pos[v+1]= sy/2+y; nor[v+1]= 0; pos[v+2]= sz/2+z; nor[v+2]= 1; v+=3;
@@ -230,6 +230,7 @@ EntitiesRenderer.prototype.applyDrawInstruction = function(params, mesh, pos, no
 			params[8],
 			0,
 			false,
+			false,
 			false
 		);
 		break;
@@ -250,7 +251,7 @@ EntitiesRenderer.prototype.applyDrawInstruction = function(params, mesh, pos, no
 
 function TextBubble() {
 
-};
+}
 
 // returns true if parameters have changed and a refresh is needed
 TextBubble.prototype.hasChanged = function() {
@@ -259,6 +260,7 @@ TextBubble.prototype.hasChanged = function() {
 	if(this.floating != this.prev_floating) { return true; }
 	if(this.tail != this.prev_tail) { return true; }
 	if(this.pickable != this.prev_pickable) { return true; }
+	return false;
 };
 
 // rebuilds mesh vertices
@@ -270,24 +272,69 @@ TextBubble.prototype.buildMesh = function() {
 		this.mesh.parent = this.parent_mesh;
 		this.mesh.position = this.position;
 		this.mesh.billboardMode = BABYLON.Mesh.BILLBOARDMODE_Y;
+
+		this.mesh.setVerticesData(BABYLON.VertexBuffer.PositionKind, []);
+		this.mesh.setVerticesData(BABYLON.VertexBuffer.UVKind, []);
+		this.mesh.setIndices([]);
 	}
 
 	this.mesh.isPickable = this.pickable;
 	this.mesh.position = this.position;
+	this.mesh.isVisible = true;
 
 	if(!this.hasChanged() && !this.floating) { return; }
 
 	// actual mesh building
-	// TODO
+	var width = 3.5;
+	var line_height = 1;
+	var texture_size = 4;
+	var positions = [];
+	var uvs = [];
+	var indices = [];
+	function addVertex(x, y) {
+		positions.push(x, y, 0);
+		uvs.push(0.5 + x/texture_size, 0.5 + y/texture_size);
+	}
 
+	if(!this.floating) {
+		/*
+		positions = [
+			-width/2, line_height/2, 0,
+			-width/2, -line_height/2, 0,
+			width/2, -line_height/2, 0,
+			width/2, line_height/2, 0,
+		];
+		uvs = [
+			0, 0,
+			0, 1,
+			1, 1,
+			1, 0
+		];
+		*/
+		addVertex(-width/2, line_height/2, 0);
+		addVertex(-width/2, -line_height/2, 0);
+		addVertex(width/2, -line_height/2, 0);
+		addVertex(width/2, line_height/2, 0);
+		indices = [
+			0, 1, 2,
+			2, 3, 0
+		];
+	} else {
+	}
 
+	this.mesh.setVerticesData(BABYLON.VertexBuffer.PositionKind, positions, true);
+	this.mesh.setVerticesData(BABYLON.VertexBuffer.UVKind, uvs, true);
+	this.mesh.setIndices(indices);
+	//console.log('refreshed text bubble');
 };
 
 // redraws dynamic texture
 TextBubble.prototype.drawCanvas = function() {
 
+	var texture_size = 256;
+
 	if(!this.canvas) {
-		this.canvas = new BABYLON.DynamicTexture("text_bubble_tex", {width: 256, height: 256}, scene);
+		this.canvas = new BABYLON.DynamicTexture("text_bubble_tex", texture_size, scene);
 		//this.canvas.hasAlpha = true;
 		var mat = new BABYLON.StandardMaterial("text_bubble_mat", scene);
 		mat.diffuseTexture = this.canvas;
@@ -299,28 +346,34 @@ TextBubble.prototype.drawCanvas = function() {
 	if(!this.hasChanged() && !this.floating) { return; }
 
 	var context = this.canvas.getContext();
-	var round_radius = 20;
-	var arrow_height = 80;
-	var rect_height = 512 - round_radius*2 - arrow_height;
-	var rect_width = 256 - round_radius*2;
 	context.strokeStyle = color4ToCSS(this.color);
 	context.fillStyle = color4ToCSS(this.color);
 
+	// params
+	var text_size = 24;
+
 	// clear
-	context.clearRect(0, 0, 256, 256);
+	context.clearRect(0, 0, texture_size, texture_size);
 
 	// background
-	context.fillRect(0, 0, 256, 256);
+	context.fillRect(0, 0, texture_size, texture_size);
 
-	// text
+	// text written in center of the bubble
 	context.fillStyle = "white";
-	context.font = "normal 16px Arial";
-	context.fillText(this.content, round_radius*2, round_radius*2);
+	context.font = "normal "+text_size+"px Arial";
+	context.textAlign = 'center';
+	context.fillText(this.content, texture_size/2, texture_size/2+text_size*0.35);
 
 	this.canvas.update();
 };
 
 TextBubble.prototype.update = function() {
+
+	// if bubble inactive: leave
+	if(!this.active) {
+		//this.mesh.isVisible = false;
+		return;
+	}
 
 	// rebuild mesh
 	this.buildMesh();
@@ -329,6 +382,8 @@ TextBubble.prototype.update = function() {
 	// update lifetime
 	if(this.remaining_time > 0) {
 		this.remaining_time -= delta_time;
+	} else {
+		this.active = false;
 	}
 
 	// save parameters
@@ -365,6 +420,7 @@ TextBubble.CreateBubble = function(parent_mesh, position, color, content, lifeti
 	}
 
 	// init bubble
+	bubble.active = true;
 	bubble.parent_mesh = parent_mesh;
 	bubble.remaining_time = lifetime;
 	bubble.floating = floating;

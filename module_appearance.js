@@ -46,6 +46,14 @@ entity_module_builder.registerModule(
 				});
 				break;
 
+				// we received a new value from the inspector
+				case "inspector_panel_change":
+				if(data.appearance_code) {
+					this.input_code = data.appearance_code;
+					this.API.setChanged(this.entity_id);
+				}
+				break;
+
 			}
 
 		};

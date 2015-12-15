@@ -109,11 +109,14 @@ EntityModuleAPI.prototype.outputPlainText = function(content) {
 EntityModuleAPI.prototype.outputEditableText = function(name, content) {
 	return ["editable_text", name, content];
 };
+EntityModuleAPI.prototype.outputTextField = function(label, name, content) {
+	return ["textfield", name, content, label];
+};
 //EntityModuleAPI.prototype.outputHeader = function(block, content) {
 //
 //};
 EntityModuleAPI.prototype.outputEditableCode = function(name, content) {
-	return ["editable_code", "", content];
+	return ["editable_code", name, content];
 };
 
 
@@ -133,6 +136,7 @@ var DRAW_DISC 			= 2;	// posX | posY | posZ | rotX | rotY | rotZ | radius | colR
 var DRAW_SPHERE 		= 3;	// posX | posY | posZ | radius | colR | colG | colB
 var DRAW_SPEECHBUBBLE 	= 4;	// posX | posY | posZ | content(string) - this is fire&forget, ie must only be sent once
 var DRAW_CLICKBUBBLE 	= 5;	// posX | posY | posZ | colR | colG | colB | message(string) | content(string) - will sent back the message when clicked
+var DRAW_TEXTBUBBLE 	= 6;	// posX | posY | posZ | colR | colG | colB | content(string) - not clickable
 
 // these functions append drawing instructions to a list
 
@@ -149,7 +153,10 @@ EntityModuleAPI.prototype.fireSpeechBubble = function(instructions_list, posX, p
 	instructions_list.push([DRAW_SPEECHBUBBLE, posX, posY, posZ, content]);
 };
 EntityModuleAPI.prototype.drawClickBubble = function(instructions_list, posX, posY, posZ, colR, colG, colB, message, content) {
-	instructions_list.push([DRAW_CLICKBUBBLE, posX, posY, posZ, rotX, colR, colG, colB, message, content]);
+	instructions_list.push([DRAW_CLICKBUBBLE, posX, posY, posZ, colR, colG, colB, message, content]);
+};
+EntityModuleAPI.prototype.drawTextBubble = function(instructions_list, posX, posY, posZ, colR, colG, colB, content) {
+	instructions_list.push([DRAW_TEXTBUBBLE, posX, posY, posZ, colR, colG, colB, content]);
 };
 
 

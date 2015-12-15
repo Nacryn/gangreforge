@@ -95,12 +95,28 @@ entity_module_builder.registerModule(
 				case "inspector_panel":
 				data.socket.emit("inspector_panel_block", {
 					elements: [
-						this.API.outputPlainText("Socket id: "+this.socket.id)
+						this.API.outputPlainText("Socket id: "+this.socket.id),
+						this.API.outputTextField("Display name: ", "client_display_name", this.display_name)
 					],
 					rank: this.rank
 				});
 				break;
+
+				case "inspector_panel_change":
+				if(data.client_display_name) {
+					this.API.setChanged(this.entity_id);
+					this.display_name = data.client_display_name;
+				}
+				break;
 			}
+
+		};
+
+		// override render function
+		module.appendDrawingInstructions = function(instructions_list) {
+
+			// display name over entity
+			this.API.drawTextBubble(instructions_list, 0, 3, 0, 0, 0, 0, this.display_name);
 
 		};
 
@@ -112,6 +128,8 @@ entity_module_builder.registerModule(
 		module.tracked_entities_collection = {};
 
 		module.last_refresh_time = 0;
+
+		module.display_name = "bob";
 
 	},
 	

@@ -59,7 +59,8 @@ io.on('connection', function(socket) {
 
 	socket.on('dispatch_message', function(msg) {
 
-		console.log('received a message to dispatch: '+msg.name);
+		console.log('msg to dispatch: '+msg.name +
+			( msg.entity_id ? " (entity: "+msg.entity_id+")" : " (all entities)") );
 		//console.dir(msg);
 		msg.data.socket = socket;
 

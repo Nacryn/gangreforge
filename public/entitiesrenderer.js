@@ -45,6 +45,7 @@ EntitiesRenderer.prototype.injectEntityData = function(entity_id, entity_data) {
 	this.entities_collection[entity_id].target_position = new BABYLON.Vector3(entity_data.target_position[0], entity_data.target_position[1], entity_data.target_position[2]);
 	this.entities_collection[entity_id].speed = entity_data.speed;
 	this.entities_collection[entity_id].drawing_instructions = entity_data.drawing_instructions;
+	this.entities_collection[entity_id].must_redraw = true;
 	if(entity_data.focus) { camera.target = this.entities_collection[entity_id].mesh; }
 
 	this.entities_collection[entity_id].mesh.setVerticesData(BABYLON.VertexBuffer.PositionKind, this.entities_collection[entity_id].positions, true);
@@ -78,26 +79,12 @@ EntitiesRenderer.prototype.updateEntitiesMeshes = function() {
 		entity.velocity = BABYLON.Vector3.Lerp(entity.velocity, diff, 0.6);
 		entity.position.addInPlace(entity.velocity);
 		//entity.velocity.scaleInPlace(0.9);
-		/*
-		if(entity.speed > 0) {
-			// update entity position
-			entity.target_position.subtractToRef(entity.position, diff);
-			diff_len = diff.length();
-			step_dist = engine.getDeltaTime()*0.001 * entity.speed;
-
-			if(step_dist >= diff_len) {
-				entity.position = entity.target_position;
-				//entity.target_position = null;
-			} else {
-				diff.normalize().scaleInPlace(step_dist);
-				entity.position.addInPlace(diff);
-			}
-		}
-		*/
 		entity.mesh.position = entity.position;
 
+		// skip if...
 		if(!entity.drawing_instructions) { continue; }
 		if(!scene.isActiveMesh(entity.mesh)) { continue; }
+		if(!entity.must_redraw) { continue; }
 
 		// update buffers
 		vertex_offset = 0;
@@ -105,6 +92,7 @@ EntitiesRenderer.prototype.updateEntitiesMeshes = function() {
 		for(i=0; i<entity.drawing_instructions.length; i++) {
 			result = this.applyDrawInstruction(
 				entity.drawing_instructions[i],
+				entity.mesh,
 				entity.positions, entity.normals, entity.colors, entity.indices,
 				vertex_offset, index_offset
 			);
@@ -118,6 +106,7 @@ EntitiesRenderer.prototype.updateEntitiesMeshes = function() {
 		entity.mesh.updateVerticesData(BABYLON.VertexBuffer.ColorKind, entity.colors, true);
 		entity.mesh.setIndices(entity.indices);
 
+		entity.must_redraw = false;
 	}
 
 };
@@ -137,14 +126,17 @@ var DRAW_DISC 			= 2;	// posX | posY | posZ | rotX | rotY | rotZ | radius | colR
 var DRAW_SPHERE 		= 3;	// posX | posY | posZ | radius | colR | colG | colB
 var DRAW_SPEECHBUBBLE 	= 4;	// posX | posY | posZ | content(string) - this is fire&forget, ie must only be sent once
 var DRAW_CLICKBUBBLE 	= 5;	// posX | posY | posZ | colR | colG | colB | message(string) | content(string) - will sent back the message when clicked
+var DRAW_TEXTBUBBLE 	= 6;	// posX | posY | posZ | colR | colG | colB | content(string) - not clickable
 
 
 // this function injects geometry data into an existing array, extending it if necessary
 // pos, nor, col and ind are the geometry buffers of the current mesh
 // v_off is the vertex offset and t_off is the triangle offset (index buffer)
 // returns an object holding vertex_count and triangle_count
+// some drawing instructions require additional meshes (text bubbles etc.):
+// for these, the renderer holds a 
 
-EntitiesRenderer.prototype.applyDrawInstruction = function(params, pos, nor, col, ind, v_off, t_off) {
+EntitiesRenderer.prototype.applyDrawInstruction = function(params, mesh, pos, nor, col, ind, v_off, t_off) {
 
 	var v = 0;		// current vertex
 	var t = 0;		// current triangle
@@ -230,8 +222,23 @@ EntitiesRenderer.prototype.applyDrawInstruction = function(params, pos, nor, col
 
 		break;
 
+		case DRAW_TEXTBUBBLE:
+
+		break;
+
 	}
 
 	return result;
 
 };
+
+
+
+// TEXT BUBBLES
+// used for speech, display names over client, click bubbles...
+// each one is made of a separate mesh with a dynamic texture
+// text bubbles have their own update function
+
+function TextBubble() {
+
+}

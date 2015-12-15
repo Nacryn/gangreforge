@@ -250,7 +250,20 @@ socket.on('inspector_panel_block', function(msg) {
 	if(!block) { return; }
 
 	var type, name, content;
-	var el;
+	var el, el2;
+
+	// callback for input controls
+	var change_value_cb = function() {
+		if(!displayed_entity_id) { return; }
+		var obj = {};
+		obj[this.name] = this.value;
+		socket.emit('dispatch_message', {
+			name: 'inspector_panel_change',
+			entity_id: displayed_entity_id,
+			data: obj
+		});
+	}
+
 	for(var i=0; i<msg.elements.length; i++) {
 
 		type = msg.elements[i][0];
@@ -290,14 +303,25 @@ socket.on('inspector_panel_block', function(msg) {
 			el.value = content;
 
 			// add change listener
-			var callback = function() {
-				socket.emit('inspector_panel_change', {});
-			}
-			el.addEventListener('keyup', callback);
-			el.addEventListener('change', callback);
+			el.addEventListener('keyup', change_value_cb);
+			el.addEventListener('change', change_value_cb);
 			break;
 
 			case "markdown":
+			break;
+
+			case "textfield":
+			el = document.createElement("p");
+			el2 = document.createElement("label");
+			el2.appendChild(document.createTextNode(msg.elements[i][3]));
+			el.appendChild(el2);
+			el2 = document.createElement("input");
+			el2.type = "text";
+			el2.name = name;
+			el2.value = content;
+			el2.addEventListener('keyup', change_value_cb);
+			el2.addEventListener('change', change_value_cb);
+			el.appendChild(el2); 
 			break;
 		}
 

@@ -135,8 +135,8 @@ var DRAW_BOX 			= 1;	// posX | posY | posZ | rotX | rotY | rotZ | sizeX | sizeY 
 var DRAW_DISC 			= 2;	// posX | posY | posZ | rotX | rotY | rotZ | radius | colR | colG | colB
 var DRAW_SPHERE 		= 3;	// posX | posY | posZ | radius | colR | colG | colB
 var DRAW_SPEECHBUBBLE 	= 4;	// posX | posY | posZ | content(string) - this is fire&forget, ie must only be sent once
-var DRAW_CLICKBUBBLE 	= 5;	// posX | posY | posZ | colR | colG | colB | message(string) | content(string) - will sent back the message when clicked
-var DRAW_TEXTBUBBLE 	= 6;	// posX | posY | posZ | colR | colG | colB | content(string) - not clickable
+var DRAW_CLICKBUBBLE 	= 5;	// posX | posY | posZ | colR | colG | colB | alpha | message(string) | content(string) - will sent back the message when clicked
+var DRAW_TEXTBUBBLE 	= 6;	// posX | posY | posZ | colR | colG | colB | alpha | content(string) - not clickable
 
 // these functions append drawing instructions to a list
 
@@ -152,11 +152,11 @@ EntityModuleAPI.prototype.drawSphere = function(instructions_list, posX, posY, p
 EntityModuleAPI.prototype.fireSpeechBubble = function(instructions_list, posX, posY, posZ, content) {
 	instructions_list.push([DRAW_SPEECHBUBBLE, posX, posY, posZ, content]);
 };
-EntityModuleAPI.prototype.drawClickBubble = function(instructions_list, posX, posY, posZ, colR, colG, colB, message, content) {
-	instructions_list.push([DRAW_CLICKBUBBLE, posX, posY, posZ, colR, colG, colB, message, content]);
+EntityModuleAPI.prototype.drawClickBubble = function(instructions_list, posX, posY, posZ, colR, colG, colB, alpha, message, content) {
+	instructions_list.push([DRAW_CLICKBUBBLE, posX, posY, posZ, colR, colG, colB, alpha, message, content]);
 };
-EntityModuleAPI.prototype.drawTextBubble = function(instructions_list, posX, posY, posZ, colR, colG, colB, content) {
-	instructions_list.push([DRAW_TEXTBUBBLE, posX, posY, posZ, colR, colG, colB, content]);
+EntityModuleAPI.prototype.drawTextBubble = function(instructions_list, posX, posY, posZ, colR, colG, colB, alpha, content) {
+	instructions_list.push([DRAW_TEXTBUBBLE, posX, posY, posZ, colR, colG, colB, alpha, content]);
 };
 
 

@@ -116,7 +116,7 @@ entity_module_builder.registerModule(
 		module.appendDrawingInstructions = function(instructions_list) {
 
 			// display name over entity
-			this.API.drawTextBubble(instructions_list, 0, 3, 0, 0, 0, 0, this.display_name);
+			this.API.drawTextBubble(instructions_list, 0, 3, 0, 0, 0, 0, 0.5, this.display_name);
 
 		};
 

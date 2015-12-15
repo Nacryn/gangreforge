@@ -226,8 +226,8 @@ EntitiesRenderer.prototype.applyDrawInstruction = function(params, mesh, pos, no
 		case DRAW_TEXTBUBBLE:
 		TextBubble.CreateBubble(mesh,
 			new BABYLON.Vector3(params[1], params[2], params[3]),
-			new BABYLON.Color3(params[4], params[5], params[6]),
-			params[7],
+			new BABYLON.Color4(params[4], params[5], params[6], params[7]),
+			params[8],
 			0,
 			false,
 			false
@@ -288,9 +288,10 @@ TextBubble.prototype.drawCanvas = function() {
 
 	if(!this.canvas) {
 		this.canvas = new BABYLON.DynamicTexture("text_bubble_tex", {width: 256, height: 256}, scene);
-		this.canvas.hasAlpha = true;
+		//this.canvas.hasAlpha = true;
 		var mat = new BABYLON.StandardMaterial("text_bubble_mat", scene);
 		mat.diffuseTexture = this.canvas;
+		mat.opacityTexture = this.canvas;
 		mat.emissiveColor = new BABYLON.Color3(1,1,1);
 		this.mesh.material = mat;
 	}
@@ -302,8 +303,8 @@ TextBubble.prototype.drawCanvas = function() {
 	var arrow_height = 80;
 	var rect_height = 512 - round_radius*2 - arrow_height;
 	var rect_width = 256 - round_radius*2;
-	context.strokeStyle = color3ToCSS(this.color);
-	context.fillStyle = color3ToCSS(this.color);
+	context.strokeStyle = color4ToCSS(this.color);
+	context.fillStyle = color4ToCSS(this.color);
 
 	// clear
 	context.clearRect(0, 0, 256, 256);
@@ -341,7 +342,7 @@ TextBubble.prototype.update = function() {
 // static stuff
 
 // NOTE: use this instead of new TextBubble()
-// position is a Vector3, color is a Color3, content is a string
+// position is a Vector3, color is a Color4, content is a string
 // lifetime is in sec (-1 for infinite)
 // if floating is true, the bubble will have a floating effect
 // if tail is true, the bubble will have a tail pointing at the parent mesh origin

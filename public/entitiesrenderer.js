@@ -25,6 +25,7 @@ function EntitiesRenderer() {
 EntitiesRenderer.prototype.update = function() {
 
 	this.updateEntitiesMeshes();
+	TextBubble.UpdateAll();
 
 };
 
@@ -71,7 +72,7 @@ EntitiesRenderer.prototype.updateEntitiesMeshes = function() {
 		// update velocity vector based on speed & target pos
 		entity.target_position.subtractToRef(entity.position, diff);
 		diff_len = diff.length();
-		step_dist = engine.getDeltaTime()*0.001 * entity.speed;
+		step_dist = delta_time * entity.speed;
 		if(diff_len > step_dist) {
 			diff.normalize().scaleInPlace(step_dist);
 		}
@@ -134,14 +135,14 @@ var DRAW_TEXTBUBBLE 	= 6;	// posX | posY | posZ | colR | colG | colB | content(s
 // v_off is the vertex offset and t_off is the triangle offset (index buffer)
 // returns an object holding vertex_count and triangle_count
 // some drawing instructions require additional meshes (text bubbles etc.):
-// for these, the renderer holds a 
+// these are made with TextBubble objects, parented to the supplied mesh
 
 EntitiesRenderer.prototype.applyDrawInstruction = function(params, mesh, pos, nor, col, ind, v_off, t_off) {
 
 	var v = 0;		// current vertex
 	var t = 0;		// current triangle
 	var i, j;
-	var x, y, z, rx, ry, rz, sx, sy, sz, rad;
+	var x, y, z, r, g, b, rx, ry, rz, sx, sy, sz, rad;
 	var result = { vertex_count: 0, triangle_count: 0 };
 
 	switch(params[0]) {
@@ -223,7 +224,14 @@ EntitiesRenderer.prototype.applyDrawInstruction = function(params, mesh, pos, no
 		break;
 
 		case DRAW_TEXTBUBBLE:
-
+		TextBubble.CreateBubble(mesh,
+			new BABYLON.Vector3(params[1], params[2], params[3]),
+			new BABYLON.Color3(params[4], params[5], params[6]),
+			params[7],
+			0,
+			false,
+			false
+		);
 		break;
 
 	}
@@ -237,8 +245,140 @@ EntitiesRenderer.prototype.applyDrawInstruction = function(params, mesh, pos, no
 // TEXT BUBBLES
 // used for speech, display names over client, click bubbles...
 // each one is made of a separate mesh with a dynamic texture
-// text bubbles have their own update function
+// text bubbles have their own update function, their own pool and static array
+// NOTE: to create a bubble, use TextBubble.CreateBubble()
 
 function TextBubble() {
 
-}
+};
+
+// returns true if parameters have changed and a refresh is needed
+TextBubble.prototype.hasChanged = function() {
+	if(this.content != this.prev_content) { return true; }
+	if(this.color != this.prev_color) { return true; }
+	if(this.floating != this.prev_floating) { return true; }
+	if(this.tail != this.prev_tail) { return true; }
+	if(this.pickable != this.prev_pickable) { return true; }
+};
+
+// rebuilds mesh vertices
+TextBubble.prototype.buildMesh = function() {
+
+	if(!this.mesh) {
+		//this.mesh = new BABYLON.Mesh('text_bubble', scene);
+		this.mesh = BABYLON.Mesh.CreatePlane('text_bubble', 4, scene);
+		this.mesh.parent = this.parent_mesh;
+		this.mesh.position = this.position;
+		this.mesh.billboardMode = BABYLON.Mesh.BILLBOARDMODE_Y;
+	}
+
+	this.mesh.isPickable = this.pickable;
+	this.mesh.position = this.position;
+
+	if(!this.hasChanged() && !this.floating) { return; }
+
+	// actual mesh building
+	// TODO
+
+
+};
+
+// redraws dynamic texture
+TextBubble.prototype.drawCanvas = function() {
+
+	if(!this.canvas) {
+		this.canvas = new BABYLON.DynamicTexture("text_bubble_tex", {width: 256, height: 256}, scene);
+		this.canvas.hasAlpha = true;
+		var mat = new BABYLON.StandardMaterial("text_bubble_mat", scene);
+		mat.diffuseTexture = this.canvas;
+		mat.emissiveColor = new BABYLON.Color3(1,1,1);
+		this.mesh.material = mat;
+	}
+
+	if(!this.hasChanged() && !this.floating) { return; }
+
+	var context = this.canvas.getContext();
+	var round_radius = 20;
+	var arrow_height = 80;
+	var rect_height = 512 - round_radius*2 - arrow_height;
+	var rect_width = 256 - round_radius*2;
+	context.strokeStyle = color3ToCSS(this.color);
+	context.fillStyle = color3ToCSS(this.color);
+
+	// clear
+	context.clearRect(0, 0, 256, 256);
+
+	// background
+	context.fillRect(0, 0, 256, 256);
+
+	// text
+	context.fillStyle = "white";
+	context.font = "normal 16px Arial";
+	context.fillText(this.content, round_radius*2, round_radius*2);
+
+	this.canvas.update();
+};
+
+TextBubble.prototype.update = function() {
+
+	// rebuild mesh
+	this.buildMesh();
+	this.drawCanvas();
+
+	// update lifetime
+	if(this.remaining_time > 0) {
+		this.remaining_time -= delta_time;
+	}
+
+	// save parameters
+	this.prev_content = this.content;
+	this.prev_color = this.color;
+	this.prev_floating = this.floating;
+	this.prev_tail = this.tail;
+	this.prev_pickable = this.pickable;
+};
+
+// static stuff
+
+// NOTE: use this instead of new TextBubble()
+// position is a Vector3, color is a Color3, content is a string
+// lifetime is in sec (-1 for infinite)
+// if floating is true, the bubble will have a floating effect
+// if tail is true, the bubble will have a tail pointing at the parent mesh origin
+TextBubble.CreateBubble = function(parent_mesh, position, color, content, lifetime, floating, tail, pickable) {
+
+	var bubble = null;
+
+	// look for a bubble that has no lifetime
+	for(var i=0; i<TextBubble.bubbles_list.length; i++) {
+		if(TextBubble.bubbles_list[i].remaining_time <= 0) {
+			bubble = TextBubble.bubbles_list[i];
+			break;
+		}
+	}
+
+	// no existing bubble found: create a new one
+	if(!bubble) {
+		bubble = new TextBubble();
+		TextBubble.bubbles_list.push(bubble);
+	}
+
+	// init bubble
+	bubble.parent_mesh = parent_mesh;
+	bubble.remaining_time = lifetime;
+	bubble.floating = floating;
+	bubble.position = position;
+	bubble.color = color;
+	bubble.content = content;
+	bubble.tail = tail;
+	bubble.pickable = pickable;
+};
+
+TextBubble.bubbles_list = [];
+TextBubble.mesh_pool = [];
+
+TextBubble.UpdateAll = function() {
+	for(var i=0; i<TextBubble.bubbles_list.length; i++) {
+		TextBubble.bubbles_list[i].update();
+	}
+};

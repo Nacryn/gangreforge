@@ -3,6 +3,7 @@ var engine;
 var scene;
 var camera;
 var time;
+var delta_time;
 var entities_renderer;
 var socket = io();
 var hovered_mesh;
@@ -78,13 +79,13 @@ function renderLoop() {
 
 // tracking app time & update local stuff
 function updateLoop() {
-	time += engine.getDeltaTime()*0.001;
+	delta_time = engine.getDeltaTime()*0.001;
+	time += delta_time;
 
 	// refresh the meshes
 	entities_renderer.update();
 
 	// check what's under the cursor
-	// temp: should not be handled that way
 	var pickResult = scene.pick(scene.pointerX, scene.pointerY, function(mesh) {
 		if(mesh.isPickable) { return true; }
 	});
@@ -359,4 +360,12 @@ function getScreenPos(worldPos) {
 	result.y = Math.floor(result.y);
 	result.z = 0;
 	return result;  
+}
+
+function color4ToCSS(color4) {
+	return 'rgba('+Math.floor(255*color4.r)+','+Math.floor(255*color4.g)+','+Math.floor(255*color4.b)+','+color4.a+')';
+}
+
+function color3ToCSS(color3) {
+	return 'rgb('+Math.floor(255*color3.r)+','+Math.floor(255*color3.g)+','+Math.floor(255*color3.b)+')';
 }

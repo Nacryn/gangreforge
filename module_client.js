@@ -108,6 +108,13 @@ entity_module_builder.registerModule(
 					this.display_name = data.client_display_name;
 				}
 				break;
+
+				// handle incoming commands
+				// temp: simply display a speech bubble
+				case "command_line_entered":
+				this.speech_stack.push(data.command);
+				this.API.setChanged(this.entity_id);
+				break;
 			}
 
 		};
@@ -117,6 +124,12 @@ entity_module_builder.registerModule(
 
 			// display name over entity
 			this.API.drawTextBubble(instructions_list, 0, 3, 0, 0, 0, 0, 0.5, this.display_name);
+
+			// output speech bubbles and clear stack
+			for(var i=0; i<this.speech_stack.length; i++) {
+				this.API.fireSpeechBubble(instructions_list, -2, 6, 0, this.speech_stack[i]);
+			}
+			this.speech_stack = [];
 
 		};
 
@@ -130,6 +143,9 @@ entity_module_builder.registerModule(
 		module.last_refresh_time = 0;
 
 		module.display_name = "bob";
+
+		// this is a stack of speech lines that we need to output
+		module.speech_stack = [];
 
 	},
 	

@@ -8,20 +8,46 @@ var entities_renderer;
 var socket = io();
 var hovered_mesh;
 
-// window events
 
+// EVENTS BINDING
+
+// page finished loading
 window.onload = function() {
 
-	// scene
+	// start scene
 	initScene();
+
+	// bind command line interface
+	document.getElementById("command_line_interface")
+		.getElementsByTagName("input")[0]
+		.addEventListener("keydown", function(e) {
+
+		// ENTER
+		if(e.keyCode == 13) {
+
+			// send message and clear
+			socket.emit('dispatch_message', {
+				name: 'command_line_entered',
+				entity_id: 'client'+socket.id,
+				data: {
+					command: this.value
+				}
+			}); 
+			this.value = "";
+
+			return false;
+		}
+
+	});
 
 };
 
+// handle resize
 window.addEventListener("resize", function() {
-		if(engine) {
-			engine.resize();
-			resizeCamera();
-		}
+	if(engine) {
+		engine.resize();
+		resizeCamera();
+	}
 });
 
 

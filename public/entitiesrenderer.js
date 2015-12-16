@@ -9,7 +9,7 @@ function EntitiesRenderer() {
 	// this is the default rendering material
 	this.default_material = new BABYLON.StandardMaterial("default", scene);
 	this.default_material.diffuseColor = new BABYLON.Color3(1, 1, 1);
-	this.default_material.specularColor = new BABYLON.Color3(0, 0, 0);
+	//this.default_material.specularColor = new BABYLON.Color3(0, 0, 0);
 	this.default_material.backFaceCulling = false;
 
 	// material used for hovered stuff
@@ -216,7 +216,15 @@ EntitiesRenderer.prototype.applyDrawInstruction = function(params, mesh, pos, no
 		break;
 
 		case DRAW_SPEECHBUBBLE:
-
+		TextBubble.CreateBubble(mesh,
+			new BABYLON.Vector3(params[1], params[2], params[3]),
+			new BABYLON.Color4(1, 0.8, 0.8, 0.5),
+			params[4],
+			4,
+			false,
+			false,
+			false
+		);
 		break;
 
 		case DRAW_CLICKBUBBLE:
@@ -255,6 +263,7 @@ function TextBubble() {
 
 // returns true if parameters have changed and a refresh is needed
 TextBubble.prototype.hasChanged = function() {
+	if(this.position != this.prev_position) { return true; }
 	if(this.content != this.prev_content) { return true; }
 	if(this.color != this.prev_color) { return true; }
 	if(this.floating != this.prev_floating) { return true; }
@@ -340,6 +349,7 @@ TextBubble.prototype.drawCanvas = function() {
 		mat.diffuseTexture = this.canvas;
 		mat.opacityTexture = this.canvas;
 		mat.emissiveColor = new BABYLON.Color3(1,1,1);
+		mat.specularColor = new BABYLON.Color3(0, 0, 0);
 		this.mesh.material = mat;
 	}
 
@@ -387,6 +397,7 @@ TextBubble.prototype.update = function() {
 	}
 
 	// save parameters
+	this.prev_position = this.position;
 	this.prev_content = this.content;
 	this.prev_color = this.color;
 	this.prev_floating = this.floating;

@@ -132,20 +132,26 @@ function mouseClick() {
 		// if there's an entity id associated with the mesh, send back a click_entity event to the server
 		if(pickResult.pickedMesh.entity_id) {
 
-			requestInspectorPanel(pickResult.pickedMesh.entity_id);
+			if(pickResult.pickedMesh.click_message) {
 
-			// socket.emit('dispatch_message', {
-			// 	name: 'click_entity',
-			// 	entity_id: pickResult.pickedMesh.entity_id,
-			// 	data: {
-			// 		click_position: [
-			// 			pickResult.pickedPoint.x,  // we send the clicked point in the entity local space
-			// 			pickResult.pickedPoint.y,
-			// 			pickResult.pickedPoint.z
-			// 		],
-			// 		message: pickResult.pickedMesh.click_message
-			// 	}
-			// });
+				socket.emit('dispatch_message', {
+					name: 'click_entity',
+					entity_id: pickResult.pickedMesh.entity_id,
+					data: {
+						click_position: [
+							pickResult.pickedPoint.x,  // we send the clicked point in the entity local space
+							pickResult.pickedPoint.y,
+							pickResult.pickedPoint.z
+						],
+						message: pickResult.pickedMesh.click_message
+					}
+				});
+
+
+			} else {
+				requestInspectorPanel(pickResult.pickedMesh.entity_id);
+			}
+			
 		}
 
 		// no entity associated: we send a click_world event with the clicked point in global space
@@ -298,7 +304,7 @@ socket.on('inspector_panel_block', function(msg) {
 			case "editable_code":
 			el = document.createElement("textarea");
 			el.name = name;
-			el.className = "codeblock";
+			el.className = "codeblock entry";
 			el.setAttribute("rows", 10);	// todo: dynamic resize
 			el.setAttribute("cols", 30);
 			el.value = content;
@@ -320,6 +326,7 @@ socket.on('inspector_panel_block', function(msg) {
 			el2.type = "text";
 			el2.name = name;
 			el2.value = content;
+			el2.className = "entry";
 			el2.addEventListener('keyup', change_value_cb);
 			el2.addEventListener('change', change_value_cb);
 			el.appendChild(el2); 

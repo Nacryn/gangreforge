@@ -39,52 +39,96 @@ body {
   bottom: 10%;
   display: none;
   /*background-color: green;*/ }
+  #entity_panel .module_block {
+    border: 3px solid rgba(255, 255, 255, 0.23);
+    border-radius: 8px;
+    background-color: rgba(0, 0, 0, 0.3);
+    color: white;
+    padding: 8px;
+    margin: 8px;
+    position: relative; }
+    #entity_panel .module_block p {
+      margin-bottom: 0px; }
+      #entity_panel .module_block p.description {
+        position: absolute;
+        top: -2px;
+        left: 100%;
+        width: 130px;
+        pointer-events: none;
+        margin: 0px 0px 0px 10px;
+        background-color: white;
+        color: black;
+        border-radius: 8px;
+        padding: 6px;
+        font-size: 0.9em;
+        opacity: 0.2; }
+    #entity_panel .module_block .codeblock {
+      padding: 4px 6px 4px 4px;
+      box-shadow: inset 0px 2px 4px rgba(0, 0, 0, 0.27);
+      color: #74D1FF;
+      margin-bottom: 0px;
+      counter-reset: line_number;
+      resize: none;
+      overflow-x: scroll;
+      overflow-y: visible;
+      white-space: nowrap; }
+      #entity_panel .module_block .codeblock code:before {
+        counter-increment: line_number;
+        content: counter(line_number) "0";
+        font-size: 0.8em;
+        padding-right: 5px;
+        color: rgba(255, 255, 255, 0.23);
+        text-align: right;
+        width: 1.7em;
+        display: inline-block; }
+    #entity_panel .module_block h1 {
+      color: white;
+      margin: 2px;
+      font-size: 1.3em; }
+    #entity_panel .module_block .entry {
+      background-color: rgba(0, 0, 0, 0.36);
+      border-radius: 4px;
+      border: 2px solid rgba(255, 255, 255, 0.23);
+      padding: 4px 6px 4px 4px;
+      box-shadow: inset 0px 2px 4px rgba(0, 0, 0, 0.27);
+      color: #74D1FF;
+      margin-bottom: 0px;
+      resize: none;
+      width: 100%;
+      box-sizing: border-box; }
 
-.module_block {
+#command_line_interface {
+  position: absolute;
+  width: 35%;
+  height: auto;
+  right: 10%;
+  bottom: 10%;
   border: 3px solid rgba(255, 255, 255, 0.23);
   border-radius: 8px;
   background-color: rgba(0, 0, 0, 0.3);
   color: white;
   padding: 8px;
-  margin: 8px;
-  position: relative; }
-  .module_block p {
-    margin-bottom: 0px; }
-    .module_block p.description {
-      position: absolute;
-      top: -2px;
-      left: 100%;
-      width: 130px;
-      pointer-events: none;
-      margin: 0px 0px 0px 10px;
-      background-color: white;
-      color: black;
-      border-radius: 8px;
-      padding: 6px;
-      font-size: 0.9em;
-      opacity: 0.2; }
-  .module_block .codeblock {
+  opacity: 0.3;
+  transition: opacity 0.4s ease-in-out; }
+  #command_line_interface:hover {
+    opacity: 1; }
+  #command_line_interface h1 {
+    font-size: 1.2em;
+    color: white;
+    font-weight: normal;
+    margin: 4px;
+    pointer-events: none; }
+  #command_line_interface .entry {
     background-color: rgba(0, 0, 0, 0.36);
     border-radius: 4px;
+    border: 2px solid rgba(255, 255, 255, 0.23);
     padding: 4px 6px 4px 4px;
     box-shadow: inset 0px 2px 4px rgba(0, 0, 0, 0.27);
     color: #74D1FF;
     margin-bottom: 0px;
-    counter-reset: line_number;
-    resize: none; }
-    .module_block .codeblock code:before {
-      counter-increment: line_number;
-      content: counter(line_number) "0";
-      font-size: 0.8em;
-      padding-right: 5px;
-      color: rgba(255, 255, 255, 0.23);
-      text-align: right;
-      width: 1.7em;
-      display: inline-block; }
-  .module_block h1 {
-    color: white;
-    margin: 2px;
-    font-size: 1.3em; }
+    resize: none;
+    width: 100%;
+    box-sizing: border-box; }
 
 /* MODULE SPECIFICS */
 .entity_block.article {

@@ -81,9 +81,9 @@ entity_module_builder.registerModule(
 		var size = Math.random()*0.6 + 0.7;
 		module.input_code =
 			"color "+(Math.random()*0.3+0.7)+" "+(Math.random()*0.3+0.7)+" "+(Math.random()*0.3+0.7)+"\n"+
-			"moveto 0 "+(size/2)+" 0\n"+
-			"box 1 "+size+" 1\n"+
-			"move 0 1 0\n"+
+			"moveto 0 "+(size/2).toFixed(2)+" 0\n"+
+			"box 1 "+size.toFixed(2)+" 1\n"+
+			"move 0 "+(size/2+0.5).toFixed(2)+" 0\n"+
 			"box 1 0.7 1";
 
 		// generated drawing instructions list (refreshed on each edit)

@@ -79,8 +79,9 @@ entity_module_builder.registerModule(
 		// it is then parsed into drawing instructions
 		// the default code is randomized
 		var size = Math.random()*0.6 + 0.7;
+		var hue = Math.random();
 		module.input_code =
-			"color "+(Math.random()*0.3+0.7)+" "+(Math.random()*0.3+0.7)+" "+(Math.random()*0.3+0.7)+"\n"+
+			"color_hsl "+hue.toFixed(2)+" 0.8 0.7\n"+
 			"moveto 0 "+(size/2).toFixed(2)+" 0\n"+
 			"box 1 "+size.toFixed(2)+" 1\n"+
 			"move 0 "+(size/2+0.5).toFixed(2)+" 0\n"+
@@ -124,7 +125,9 @@ entity_module_builder.registerModule(
 					case "disc": param_count = 1; break;
 					case "sphere": param_count = 1; break;
 					case "color": param_count = 3; break;
+					case "color_hsl": param_count = 3; break;
 					case "shiftcolor": param_count = 3; break;
+					case "shiftcolor_hsl": param_count = 3; break;
 					default: result[i] = "instruction invalid"; error = true;
 				}
 				params.push(verb);
@@ -163,6 +166,7 @@ entity_module_builder.registerModule(
 			var translation = {x:0, y:0, z:0};
 			var rotation = {x:0, y:0, z:0};
 			var color = {r:0, g:0, b:0};		// alpha not supported
+			var a, b, c;			// temps
 
 			for(i=0; i<instructions.length; i++) {
 
@@ -217,10 +221,32 @@ entity_module_builder.registerModule(
 						color.b = Math.max(Math.min(params[3], 1), 0);
 					break;
 
+					case "color_hsl":
+						a = this.convertHSLtoRGB(
+							Math.max(Math.min(params[1], 1), 0),
+							Math.max(Math.min(params[2], 1), 0),
+							Math.max(Math.min(params[3], 1), 0)
+						);
+						color.r = a.r;
+						color.g = a.g;
+						color.b = a.b;
+					break;
+
 					case "shiftcolor":
 						color.r = Math.max(Math.min(color.r+params[1], 1), 0);
 						color.g = Math.max(Math.min(color.g+params[2], 1), 0);
 						color.b = Math.max(Math.min(color.b+params[3], 1), 0);
+					break;
+
+					case "shiftcolor_hsl":
+						a = this.convertRGBtoHSL(color.R, color.g, color.b);
+						a.h = Math.max(Math.min(a.h+params[1], 1), 0);
+						a.s = Math.max(Math.min(a.s+params[2], 1), 0);
+						a.l = Math.max(Math.min(a.l+params[3], 1), 0);
+						a = this.convertHSLtoRGB(a.h, a.s, a.l);
+						color.r = a.r;
+						color.g = a.g;
+						color.b = a.b;
 					break;
 				}
 			}
@@ -228,8 +254,53 @@ entity_module_builder.registerModule(
 			return null;
 		};
 
+
+		// utils
+
+		module.convertHSLtoRGB = function(h, s, l) {
+			result = {r: 0, g: 0, b: 0};
+			var r, g, b, i, f, p, q, t;
+			i = Math.floor(h * 6);
+			f = h * 6 - i;
+			p = l * (1 - s);
+			q = l * (1 - f * s);
+			t = l * (1 - (1 - f) * s);
+			switch (i % 6) {
+				case 0: result.r = l, result.g = t, result.b = p; break;
+				case 1: result.r = q, result.g = l, result.b = p; break;
+				case 2: result.r = p, result.g = l, result.b = t; break;
+				case 3: result.r = p, result.g = q, result.b = l; break;
+				case 4: result.r = t, result.g = p, result.b = l; break;
+				case 5: result.r = l, result.g = p, result.b = q; break;
+			}
+			return result;
+		}
+
+		module.convertRGBtoHSL = function(r, g, b) {
+			var result = {h: 0, s: 0, l: 0};
+			var max = Math.max(r, g, b);
+			var min = Math.min(r, g, b);
+			result.l = (max + min) / 2;
+			if(max == min) {
+				result.h = result.s = 0; // achromatic
+			} else {
+				var d = max - min;
+				result.s = result.l > 0.5 ? d / (2 - max - min) : d / (max + min);
+				switch(max) {
+					case r: result.h = (g - b) / d + (g < b ? 6 : 0); break;
+					case g: result.h = (b - r) / d + 2; break;
+					case b: result.h = (r - g) / d + 4; break;
+				}
+				result.h /= 6;
+			}
+			return result;
+		}
+
+
+
 		// first parse
 		module.parseInstructionList();
+
 
 	},
 	

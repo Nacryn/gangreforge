@@ -69,7 +69,7 @@ body {
       margin-bottom: 0px;
       counter-reset: line_number;
       resize: none;
-      overflow-x: scroll;
+      overflow-x: auto;
       overflow-y: visible;
       white-space: nowrap; }
       #entity_panel .module_block .codeblock code:before {

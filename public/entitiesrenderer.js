@@ -221,8 +221,8 @@ EntitiesRenderer.prototype.applyDrawInstruction = function(params, mesh, pos, no
 			new BABYLON.Color4(1, 0.8, 0.8, 0.5),
 			params[4],
 			4,
-			false,
-			false,
+			true,
+			true,
 			false
 		);
 		break;

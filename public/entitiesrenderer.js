@@ -45,10 +45,20 @@ EntitiesRenderer.prototype.injectEntityData = function(entity_id, entity_data) {
 	//position: new BABYLON.Vector3(entity_data.position[0], entity_data.position[1], entity_data.position[2]),
 	this.entities_collection[entity_id].target_position = new BABYLON.Vector3(entity_data.target_position[0], entity_data.target_position[1], entity_data.target_position[2]);
 	this.entities_collection[entity_id].speed = entity_data.speed;
-	this.entities_collection[entity_id].drawing_instructions = entity_data.drawing_instructions;
+	//this.entities_collection[entity_id].drawing_instructions = entity_data.drawing_instructions;
 	this.entities_collection[entity_id].must_redraw = true;
 	if(entity_data.focus) { camera.target = this.entities_collection[entity_id].mesh; }
 
+	// add drawing instructions
+	this.entities_collection[entity_id].drawing_instructions = new Array(entity_data.drawing_instructions.length);
+	for(var i=0; i<entity_data.drawing_instructions.length; i++) {
+		this.entities_collection[entity_id].drawing_instructions[i] = {
+			params: entity_data.drawing_instructions[i],
+			do_again: true 		// if false, the instruction will be skipped
+		}
+	}
+
+	// init mesh stuff
 	this.entities_collection[entity_id].mesh.setVerticesData(BABYLON.VertexBuffer.PositionKind, this.entities_collection[entity_id].positions, true);
 	this.entities_collection[entity_id].mesh.setVerticesData(BABYLON.VertexBuffer.NormalKind, this.entities_collection[entity_id].normals, true);
 	this.entities_collection[entity_id].mesh.setVerticesData(BABYLON.VertexBuffer.ColorKind, this.entities_collection[entity_id].colors, true);
@@ -85,12 +95,16 @@ EntitiesRenderer.prototype.updateEntitiesMeshes = function() {
 		// skip if...
 		if(!entity.drawing_instructions) { continue; }
 		if(!scene.isActiveMesh(entity.mesh)) { continue; }
-		if(!entity.must_redraw) { continue; }
+		//if(!entity.must_redraw) { continue; }
 
 		// update buffers
 		vertex_offset = 0;
 		index_offset = 0;
 		for(i=0; i<entity.drawing_instructions.length; i++) {
+
+			// skip if asked so
+			if(!entity.drawing_instructions[i].do_again) { continue; }
+
 			result = this.applyDrawInstruction(
 				entity.drawing_instructions[i],
 				entity.mesh,
@@ -107,7 +121,7 @@ EntitiesRenderer.prototype.updateEntitiesMeshes = function() {
 		entity.mesh.updateVerticesData(BABYLON.VertexBuffer.ColorKind, entity.colors, true);
 		entity.mesh.setIndices(entity.indices);
 
-		entity.must_redraw = false;
+		//entity.must_redraw = false;
 	}
 
 };
@@ -137,13 +151,14 @@ var DRAW_TEXTBUBBLE 	= 6;	// posX | posY | posZ | colR | colG | colB | content(s
 // some drawing instructions require additional meshes (text bubbles etc.):
 // these are made with TextBubble objects, parented to the supplied mesh
 
-EntitiesRenderer.prototype.applyDrawInstruction = function(params, mesh, pos, nor, col, ind, v_off, t_off) {
+EntitiesRenderer.prototype.applyDrawInstruction = function(drawing_inst, mesh, pos, nor, col, ind, v_off, t_off) {
 
 	var v = 0;		// current vertex
 	var t = 0;		// current triangle
 	var i, j;
 	var x, y, z, r, g, b, rx, ry, rz, sx, sy, sz, rad;
 	var result = { vertex_count: 0, triangle_count: 0 };
+	var params = drawing_inst.params;
 
 	switch(params[0]) {
 
@@ -205,6 +220,9 @@ EntitiesRenderer.prototype.applyDrawInstruction = function(params, mesh, pos, no
 
 		result.vertex_count = 24; result.triangle_count = 12;
 
+		// do not do again (except if parameters are dynamic)
+		drawing_inst.do_again = false;
+
 		break;
 
 		case DRAW_DISC:
@@ -217,14 +235,16 @@ EntitiesRenderer.prototype.applyDrawInstruction = function(params, mesh, pos, no
 
 		case DRAW_SPEECHBUBBLE:
 		TextBubble.CreateBubble(mesh,
-			new BABYLON.Vector3(params[1], params[2], params[3]),
+			new BABYLON.Vector3(-2, 4, 0),
 			new BABYLON.Color4(1, 0.8, 0.8, 0.5),
-			params[4],
-			4,
+			params[1],
+			3 + 0.2 * params[1].length,		// time in sec per character
 			true,
 			true,
 			false
 		);
+		// do not do again (these are fire&forget)
+		drawing_inst.do_again = false;
 		break;
 
 		case DRAW_CLICKBUBBLE:
@@ -241,6 +261,8 @@ EntitiesRenderer.prototype.applyDrawInstruction = function(params, mesh, pos, no
 			false,
 			false
 		);
+		// must be refreshed every frame
+		drawing_inst.do_again = true;
 		break;
 
 	}
@@ -299,42 +321,54 @@ TextBubble.prototype.buildMesh = function() {
 	var indices = [];
 	var me = this;
 	function addVertex(x, y) {
-		positions.push(me.position.x+x, me.position.y+y, 0);
-		uvs.push(0.5 + x/texture_size, 0.5 + y/texture_size);
+		var x_mod = x;
+		var y_mod = y;
+ 		positions.push(me.position.x+x_mod, me.position.y+y_mod, 0);
+		uvs.push(0.5 + x_mod/texture_size, 0.5 + y_mod/texture_size);
 	}
 
 	if(!this.floating) {
-		addVertex(-width/2, line_height/2, 0);
-		addVertex(-width/2, -line_height/2, 0);
-		addVertex(width/2, -line_height/2, 0);
-		addVertex(width/2, line_height/2, 0);
+		addVertex(-width/2, line_height/2);
+		addVertex(-width/2, -line_height/2);
+		addVertex(width/2, -line_height/2);
+		addVertex(width/2, line_height/2);
 		indices = [
 			0, 1, 2,
 			2, 3, 0
 		];
 	} else {
 
-		var count = 16;
-		addVertex(0, 0, 0);
+		var count = 18;
+		addVertex(0, 0);
 		indices = new Array(count*3);
 
-		var angle;
+		var angle, n;
 		for(var i=0; i<count; i++) {
 			angle = i * Math.PI * 2 / count;
-			addVertex(Math.cos(angle) * width/2, Math.sin(angle) * line_height/2, 0);
+			//n = noise.perlin2(i, time*1.2) * 0.18;
+			n = noise.perlin2(i*0.8 + time*1.0 + 100, 0) * 0.16;
+			addVertex(Math.cos(angle) * (width/2 + n), Math.sin(angle) * (line_height/2+n));
 			indices[i*3] = 0;
 			indices[i*3+1] = i+1;
 			indices[i*3+2] = (i == count-1 ? 1 : i+2);
 		}
 
-		if(this.lifetime < 1) { this.mesh.visibility = this.lifetime; }
-		else if(this.max_lifetime - this.lifetime < 1) {
-			this.mesh.visibility = this.max_lifetime - this.lifetime;
+		// appear/disappear anim
+		if(this.lifetime < 0.5) { this.mesh.visibility = this.lifetime*2; }
+		else if(this.max_lifetime - this.lifetime < 0.7) {
+			this.mesh.visibility = (this.max_lifetime - this.lifetime) / 0.7;
 		} else {
 			this.mesh.visibility = 1;
 		}
 
 	}
+
+	// ugly
+	// if(this.tail) {
+	// 	var i = positions.length/3;
+	// 	addVertex(1.5, 0); addVertex(-1.5, 0); addVertex(-1, -3);
+	// 	indices.push(i, i+1, i+2);
+	// }
 
 	this.mesh.setVerticesData(BABYLON.VertexBuffer.PositionKind, positions, true);
 	this.mesh.setVerticesData(BABYLON.VertexBuffer.UVKind, uvs, true);
@@ -387,7 +421,7 @@ TextBubble.prototype.update = function() {
 
 	// if bubble inactive: leave
 	if(!this.active) {
-		//this.mesh.isVisible = false;
+		this.mesh.isVisible = false;
 		return;
 	}
 

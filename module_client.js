@@ -127,7 +127,7 @@ entity_module_builder.registerModule(
 
 			// output speech bubbles and clear stack
 			for(var i=0; i<this.speech_stack.length; i++) {
-				this.API.fireSpeechBubble(instructions_list, -2, 6, 0, this.speech_stack[i]);
+				this.API.fireSpeechBubble(instructions_list, this.speech_stack[i]);
 			}
 			this.speech_stack = [];
 

@@ -7,6 +7,7 @@ var delta_time;
 var entities_renderer;
 var socket = io();
 var hovered_mesh;
+var my_entity_id = 'client'+socket.id;
 
 
 // EVENTS BINDING
@@ -28,7 +29,7 @@ window.onload = function() {
 			// send message and clear
 			socket.emit('dispatch_message', {
 				name: 'command_line_entered',
-				entity_id: 'client'+socket.id,
+				entity_id: my_entity_id,
 				data: {
 					command: this.value
 				}
@@ -70,7 +71,7 @@ function initScene() {
 
 	// camera setup
 	camera = new BABYLON.ArcRotateCamera("camera", 0.5, 1.1, 30, new BABYLON.Vector3(0,0,0), scene);
-	camera.attachControl(canvas);
+	//camera.attachControl(canvas);
 	//camera.mode = BABYLON.Camera.ORTHOGRAPHIC_CAMERA;
 	resizeCamera();
 
@@ -180,10 +181,11 @@ function mouseClick() {
 			
 		}
 
-		// no entity associated: we send a click_world event with the clicked point in global space
+		// no entity associated: we send a click_world event (only to the client entity) with the clicked point in global space
 		else {
 			socket.emit('dispatch_message', {
 				name: 'click_world',
+				entity_id: my_entity_id,
 				data: {
 					click_position: [
 						pickResult.pickedPoint.x,

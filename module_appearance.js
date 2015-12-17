@@ -166,7 +166,6 @@ entity_module_builder.registerModule(
 			var translation = {x:0, y:0, z:0};
 			var rotation = {x:0, y:0, z:0};
 			var color = {r:0, g:0, b:0};		// alpha not supported
-			var a, b, c;			// temps
 
 			for(i=0; i<instructions.length; i++) {
 
@@ -239,7 +238,7 @@ entity_module_builder.registerModule(
 					break;
 
 					case "shiftcolor_hsl":
-						a = this.convertRGBtoHSL(color.R, color.g, color.b);
+						a = this.convertRGBtoHSL(color.r, color.g, color.b);
 						a.h = Math.max(Math.min(a.h+params[1], 1), 0);
 						a.s = Math.max(Math.min(a.s+params[2], 1), 0);
 						a.l = Math.max(Math.min(a.l+params[3], 1), 0);
@@ -266,15 +265,15 @@ entity_module_builder.registerModule(
 			q = l * (1 - f * s);
 			t = l * (1 - (1 - f) * s);
 			switch (i % 6) {
-				case 0: result.r = l, result.g = t, result.b = p; break;
-				case 1: result.r = q, result.g = l, result.b = p; break;
-				case 2: result.r = p, result.g = l, result.b = t; break;
-				case 3: result.r = p, result.g = q, result.b = l; break;
-				case 4: result.r = t, result.g = p, result.b = l; break;
-				case 5: result.r = l, result.g = p, result.b = q; break;
+				case 0: result.r = l; result.g = t; result.b = p; break;
+				case 1: result.r = q; result.g = l; result.b = p; break;
+				case 2: result.r = p; result.g = l; result.b = t; break;
+				case 3: result.r = p; result.g = q; result.b = l; break;
+				case 4: result.r = t; result.g = p; result.b = l; break;
+				case 5: result.r = l; result.g = p; result.b = q; break;
 			}
 			return result;
-		}
+		};
 
 		module.convertRGBtoHSL = function(r, g, b) {
 			var result = {h: 0, s: 0, l: 0};
@@ -294,7 +293,7 @@ entity_module_builder.registerModule(
 				result.h /= 6;
 			}
 			return result;
-		}
+		};
 
 
 

@@ -82,6 +82,7 @@ entity_module_builder.registerModule(
 		var hue = Math.random();
 		module.input_code =
 			"color_hsl "+hue.toFixed(2)+" 0.8 0.7\n"+
+			"disc 1.1\n"+
 			"moveto 0 "+(size/2).toFixed(2)+" 0\n"+
 			"box 1 "+size.toFixed(2)+" 1\n"+
 			"move 0 "+(size/2+0.5).toFixed(2)+" 0\n"+

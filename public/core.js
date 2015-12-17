@@ -7,7 +7,7 @@ var delta_time;
 var entities_renderer;
 var socket = io();
 var hovered_mesh;
-var my_entity_id = 'client'+socket.id;
+var my_entity_id;
 
 
 // EVENTS BINDING
@@ -71,7 +71,7 @@ function initScene() {
 
 	// camera setup
 	camera = new BABYLON.ArcRotateCamera("camera", 0.5, 1.1, 30, new BABYLON.Vector3(0,0,0), scene);
-	//camera.attachControl(canvas);
+	camera.attachControl(canvas);
 	//camera.mode = BABYLON.Camera.ORTHOGRAPHIC_CAMERA;
 	resizeCamera();
 
@@ -225,6 +225,10 @@ function hideInspectorPanel() {
 
 
 // SOCKETS INTERFACE
+
+socket.on('connect', function() {
+	my_entity_id = 'client'+socket.id;
+});
 
 socket.on('entity_data', function(msg) {
 

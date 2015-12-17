@@ -226,7 +226,42 @@ EntitiesRenderer.prototype.applyDrawInstruction = function(drawing_inst, mesh, p
 		break;
 
 		case DRAW_DISC:
-		// Todo
+
+		v = v_off*3;
+		x = params[1]; y = params[2]; z = params[3];
+		rx = params[4]; ry = params[5]; rz = params[6];
+		rad = params[7];
+
+		// center
+		pos[v+0]=x; nor[v+0]= 0; pos[v+1]= y; nor[v+1]= 1; pos[v+2]= z; nor[v+2]= 0; v+=3;
+		col[v_off*4 + 0] = params[8];
+		col[v_off*4 + 1] = params[9];
+		col[v_off*4 + 2] = params[10];
+		col[v_off*4 + 3] = 1;
+
+		// circle (12 subs)
+		var angle;
+		for(i=0; i<12; i++) {
+			angle = 2 * Math.PI * i / 12;
+			pos[v+i*3]=x+rad*Math.cos(angle); nor[v+i*3]= 0;
+			pos[v+i*3+1]= y; nor[v+i*3+1]= 1;
+			pos[v+i*3+2]= z+rad*Math.sin(angle); nor[v+i*3+2]= 0;
+			col[v_off*4 + (i+1)*4 + 0] = params[8];
+			col[v_off*4 + (i+1)*4 + 1] = params[9];
+			col[v_off*4 + (i+1)*4 + 2] = params[10];
+			col[v_off*4 + (i+1)*4 + 3] = 1;
+
+			ind[t_off*3 + i*3 + 0] = t_off;
+			ind[t_off*3 + i*3 + 1] = t_off + i + 1;
+			if(i < 12-1) { ind[t_off*3 + i*3 + 2] = t_off + i + 2; }
+			else { ind[t_off*3 + i*3 + 2] = t_off + 1; }
+		}
+
+		result.vertex_count = 12+1; result.triangle_count = 12;
+
+		// do not do again (except if parameters are dynamic)
+		drawing_inst.do_again = false;
+
 		break;
 
 		case DRAW_SPHERE:

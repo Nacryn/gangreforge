@@ -208,11 +208,11 @@ EntitiesRenderer.prototype.applyDrawInstruction = function(params, mesh, pos, no
 		break;
 
 		case DRAW_DISC:
-
+		// Todo
 		break;
 
 		case DRAW_SPHERE:
-
+		// todo
 		break;
 
 		case DRAW_SPEECHBUBBLE:
@@ -276,19 +276,16 @@ TextBubble.prototype.hasChanged = function() {
 TextBubble.prototype.buildMesh = function() {
 
 	if(!this.mesh) {
-		//this.mesh = new BABYLON.Mesh('text_bubble', scene);
-		this.mesh = BABYLON.Mesh.CreatePlane('text_bubble', 4, scene);
+		this.mesh = new BABYLON.Mesh('text_bubble', scene);
+		//this.mesh = BABYLON.Mesh.CreateBox('text_bubble', 4, scene);
 		this.mesh.parent = this.parent_mesh;
-		this.mesh.position = this.position;
+		//this.mesh.position = this.position;
 		this.mesh.billboardMode = BABYLON.Mesh.BILLBOARDMODE_Y;
-
-		this.mesh.setVerticesData(BABYLON.VertexBuffer.PositionKind, []);
-		this.mesh.setVerticesData(BABYLON.VertexBuffer.UVKind, []);
-		this.mesh.setIndices([]);
+		//this.mesh.setIndices(new Uint8Array(300));
 	}
 
 	this.mesh.isPickable = this.pickable;
-	this.mesh.position = this.position;
+	//this.mesh.position = this.position;
 	this.mesh.isVisible = true;
 
 	if(!this.hasChanged() && !this.floating) { return; }
@@ -300,26 +297,13 @@ TextBubble.prototype.buildMesh = function() {
 	var positions = [];
 	var uvs = [];
 	var indices = [];
+	var me = this;
 	function addVertex(x, y) {
-		positions.push(x, y, 0);
+		positions.push(me.position.x+x, me.position.y+y, 0);
 		uvs.push(0.5 + x/texture_size, 0.5 + y/texture_size);
 	}
 
 	if(!this.floating) {
-		/*
-		positions = [
-			-width/2, line_height/2, 0,
-			-width/2, -line_height/2, 0,
-			width/2, -line_height/2, 0,
-			width/2, line_height/2, 0,
-		];
-		uvs = [
-			0, 0,
-			0, 1,
-			1, 1,
-			1, 0
-		];
-		*/
 		addVertex(-width/2, line_height/2, 0);
 		addVertex(-width/2, -line_height/2, 0);
 		addVertex(width/2, -line_height/2, 0);
@@ -329,12 +313,34 @@ TextBubble.prototype.buildMesh = function() {
 			2, 3, 0
 		];
 	} else {
+
+		var count = 16;
+		addVertex(0, 0, 0);
+		indices = new Array(count*3);
+
+		var angle;
+		for(var i=0; i<count; i++) {
+			angle = i * Math.PI * 2 / count;
+			addVertex(Math.cos(angle) * width/2, Math.sin(angle) * line_height/2, 0);
+			indices[i*3] = 0;
+			indices[i*3+1] = i+1;
+			indices[i*3+2] = (i == count-1 ? 1 : i+2);
+		}
+
+		if(this.lifetime < 1) { this.mesh.visibility = this.lifetime; }
+		else if(this.max_lifetime - this.lifetime < 1) {
+			this.mesh.visibility = this.max_lifetime - this.lifetime;
+		} else {
+			this.mesh.visibility = 1;
+		}
+
 	}
 
 	this.mesh.setVerticesData(BABYLON.VertexBuffer.PositionKind, positions, true);
 	this.mesh.setVerticesData(BABYLON.VertexBuffer.UVKind, uvs, true);
 	this.mesh.setIndices(indices);
 	//console.log('refreshed text bubble');
+	this.mesh.subdivide(1);
 };
 
 // redraws dynamic texture
@@ -390,8 +396,8 @@ TextBubble.prototype.update = function() {
 	this.drawCanvas();
 
 	// update lifetime
-	if(this.remaining_time > 0) {
-		this.remaining_time -= delta_time;
+	if(this.lifetime < this.max_lifetime) {
+		this.lifetime += delta_time;
 	} else {
 		this.active = false;
 	}
@@ -418,7 +424,7 @@ TextBubble.CreateBubble = function(parent_mesh, position, color, content, lifeti
 
 	// look for a bubble that has no lifetime
 	for(var i=0; i<TextBubble.bubbles_list.length; i++) {
-		if(TextBubble.bubbles_list[i].remaining_time <= 0) {
+		if(!TextBubble.bubbles_list[i].active) {
 			bubble = TextBubble.bubbles_list[i];
 			break;
 		}
@@ -433,7 +439,8 @@ TextBubble.CreateBubble = function(parent_mesh, position, color, content, lifeti
 	// init bubble
 	bubble.active = true;
 	bubble.parent_mesh = parent_mesh;
-	bubble.remaining_time = lifetime;
+	bubble.lifetime = 0;
+	bubble.max_lifetime = lifetime;
 	bubble.floating = floating;
 	bubble.position = position;
 	bubble.color = color;

@@ -228,6 +228,7 @@ function hideInspectorPanel() {
 
 socket.on('connect', function() {
 	my_entity_id = 'client'+socket.id;
+	console.log('connected! our entity: '+my_entity_id);
 });
 
 socket.on('entity_data', function(msg) {
@@ -261,7 +262,7 @@ socket.on('inspector_panel_structure', function(msg) {
 
 	// add new blocks corresponding to the specified entity
 	var newblock, child;
-	for(var i=0; i<msg.length; i++) {
+	for(i=0; i<msg.length; i++) {
 		newblock = document.createElement("div");
 		newblock.className = "module_block";
 		newblock.id = "module_rank"+msg[i].rank;
@@ -301,7 +302,7 @@ socket.on('inspector_panel_block', function(msg) {
 			entity_id: displayed_entity_id,
 			data: obj
 		});
-	}
+	};
 
 	for(var i=0; i<msg.elements.length; i++) {
 

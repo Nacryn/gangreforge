@@ -59,8 +59,8 @@ io.on('connection', function(socket) {
 
 	socket.on('dispatch_message', function(msg) {
 
-		console.log('msg to dispatch: '+msg.name +
-			( msg.entity_id ? " (entity: "+msg.entity_id+")" : " (all entities)") );
+		//console.log('msg to dispatch: '+msg.name +
+		//	( msg.entity_id ? " (entity: "+msg.entity_id+")" : " (all entities)") );
 		//console.dir(msg);
 
 		// we add the socket ref to the message, to be able to respond to it!

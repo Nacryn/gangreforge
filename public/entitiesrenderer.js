@@ -46,7 +46,7 @@ EntitiesRenderer.prototype.injectEntityData = function(entity_id, entity_data) {
 	this.entities_collection[entity_id].target_position = new BABYLON.Vector3(entity_data.target_position[0], entity_data.target_position[1], entity_data.target_position[2]);
 	this.entities_collection[entity_id].speed = entity_data.speed;
 	//this.entities_collection[entity_id].drawing_instructions = entity_data.drawing_instructions;
-	this.entities_collection[entity_id].must_redraw = true;
+	//this.entities_collection[entity_id].must_redraw = true;
 	if(entity_data.focus) { camera.target = this.entities_collection[entity_id].mesh; }
 
 	// add drawing instructions
@@ -55,6 +55,10 @@ EntitiesRenderer.prototype.injectEntityData = function(entity_id, entity_data) {
 		this.entities_collection[entity_id].drawing_instructions[i] = {
 			params: entity_data.drawing_instructions[i],
 			do_again: true 		// if false, the instruction will be skipped
+		};
+
+		if(entity_data.drawing_instructions[i][0] == 4) {
+			console.dir("speech bubble received for entity "+entity_id);
 		}
 	}
 
@@ -65,6 +69,7 @@ EntitiesRenderer.prototype.injectEntityData = function(entity_id, entity_data) {
 	this.entities_collection[entity_id].mesh.setIndices(this.entities_collection[entity_id].indices);
 	this.entities_collection[entity_id].mesh.material = this.default_material;
 	this.entities_collection[entity_id].mesh.entity_id = entity_id;
+
 };
 
 // update each entities mesh according to its drawing instructions, and set position
@@ -139,7 +144,7 @@ var DRAW_NONE 			= 0;	// not used
 var DRAW_BOX 			= 1;	// posX | posY | posZ | rotX | rotY | rotZ | sizeX | sizeY | sizeZ | colR | colG | colB
 var DRAW_DISC 			= 2;	// posX | posY | posZ | rotX | rotY | rotZ | radius | colR | colG | colB
 var DRAW_SPHERE 		= 3;	// posX | posY | posZ | radius | colR | colG | colB
-var DRAW_SPEECHBUBBLE 	= 4;	// posX | posY | posZ | content(string) - this is fire&forget, ie must only be sent once
+var DRAW_SPEECHBUBBLE 	= 4;	// content(string) - this is fire&forget, ie must only be sent once
 var DRAW_CLICKBUBBLE 	= 5;	// posX | posY | posZ | colR | colG | colB | message(string) | content(string) - will sent back the message when clicked
 var DRAW_TEXTBUBBLE 	= 6;	// posX | posY | posZ | colR | colG | colB | content(string) - not clickable
 
@@ -269,7 +274,8 @@ EntitiesRenderer.prototype.applyDrawInstruction = function(drawing_inst, mesh, p
 		break;
 
 		case DRAW_SPEECHBUBBLE:
-		TextBubble.CreateBubble(mesh,
+		TextBubble.CreateBubble(
+			mesh,
 			new BABYLON.Vector3(-2, 4, 0),
 			new BABYLON.Color4(1, 0.8, 0.8, 0.5),
 			params[1],
@@ -283,11 +289,12 @@ EntitiesRenderer.prototype.applyDrawInstruction = function(drawing_inst, mesh, p
 		break;
 
 		case DRAW_CLICKBUBBLE:
-
+		// TODO2
 		break;
 
 		case DRAW_TEXTBUBBLE:
-		TextBubble.CreateBubble(mesh,
+		TextBubble.CreateBubble(
+			mesh,
 			new BABYLON.Vector3(params[1], params[2], params[3]),
 			new BABYLON.Color4(params[4], params[5], params[6], params[7]),
 			params[8],
@@ -334,16 +341,13 @@ TextBubble.prototype.buildMesh = function() {
 
 	if(!this.mesh) {
 		this.mesh = new BABYLON.Mesh('text_bubble', scene);
-		//this.mesh = BABYLON.Mesh.CreateBox('text_bubble', 4, scene);
-		this.mesh.parent = this.parent_mesh;
-		//this.mesh.position = this.position;
 		this.mesh.billboardMode = BABYLON.Mesh.BILLBOARDMODE_Y;
-		//this.mesh.setIndices(new Uint8Array(300));
 	}
 
 	this.mesh.isPickable = this.pickable;
-	//this.mesh.position = this.position;
+	//this.mesh.position = this.position;	// added in vertex positions
 	this.mesh.isVisible = true;
+	this.mesh.parent = this.parent_mesh;
 
 	if(!this.hasChanged() && !this.floating) { return; }
 
@@ -371,6 +375,7 @@ TextBubble.prototype.buildMesh = function() {
 			0, 1, 2,
 			2, 3, 0
 		];
+		this.mesh.visibility = 1;
 	} else {
 
 		var count = 18;

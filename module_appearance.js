@@ -1,17 +1,6 @@
 // the appearance module defines the general shape of the entity object
 // it relies on a 'source code' that defines what shapes get drawn
 
-// sending geometry to the client is then done using Geometry Blocks
-// these are of fixed size and can be serialized in JSON
-// they hold arrays containing: positions, colors, uvs, normals and indices
-
-// this module does not handle these blocks directly, instead it uses a
-// GeometryBuffer object provided by the EntityModuleAPI
-// this object then manages its own collection of blocks
-
-// these blocks are sent to the client by the "client" modules
-// so the "appearance" modules only handle filling the buffer
-
 // note: all geometry is drawn in local space!
 
 
@@ -62,14 +51,6 @@ entity_module_builder.registerModule(
 		// override render function
 		module.appendDrawingInstructions = function(instructions_list) {
 
-			// temp
-			/*
-			this.API.drawBox(instructions_list,
-				0, 0, 0,
-				0, 0, 0,
-				2, 3, 2,
-				0.8, 0.6, 0.6);
-			*/
 			for(var i=0; i<this.instructions.length; i++) {
 				instructions_list.push(this.instructions[i]);
 			}
@@ -78,7 +59,7 @@ entity_module_builder.registerModule(
 		// this is the input code written by the client
 		// it is then parsed into drawing instructions
 		// the default code is randomized
-		var size = Math.random()*0.6 + 0.7;
+		var size = Math.random()*1.2 + 0.55;
 		var hue = Math.random();
 		module.input_code =
 			"color_hsl "+hue.toFixed(2)+" 0.8 0.7\n"+

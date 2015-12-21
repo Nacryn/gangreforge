@@ -82,6 +82,11 @@ entity_module_builder.registerModule(
 
 				break;
 
+				case "late_update":
+				// clear speech stack
+				this.speech_stack = [];
+				break;
+
 
 				// the user clicked on the ground: go there
 				case "click_world":
@@ -128,8 +133,8 @@ entity_module_builder.registerModule(
 			// output speech bubbles and clear stack
 			for(var i=0; i<this.speech_stack.length; i++) {
 				this.API.fireSpeechBubble(instructions_list, this.speech_stack[i]);
+				//console.log("entity "+this.entity_id+" sent speech: "+this.speech_stack[i]);
 			}
-			this.speech_stack = [];
 
 		};
 

@@ -71,7 +71,7 @@ function initScene() {
 
 	// camera setup
 	camera = new BABYLON.ArcRotateCamera("camera", 0.5, 1.1, 30, new BABYLON.Vector3(0,0,0), scene);
-	camera.attachControl(canvas);
+	//camera.attachControl(canvas);
 	//camera.mode = BABYLON.Camera.ORTHOGRAPHIC_CAMERA;
 	resizeCamera();
 
